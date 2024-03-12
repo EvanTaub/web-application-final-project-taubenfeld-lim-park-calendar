@@ -2509,3 +2509,11 @@ div.event-list {
   margin-bottom: 0; /* Remove any default margin */
   font-size: 12px
 }
+
+.dateinfo {
+  align-items: center; 
+  justify-content: center;
+  font-size: 60px
+}
+
+
