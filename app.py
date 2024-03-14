@@ -19,6 +19,10 @@ def login():
 def calendar():
     return render_template("calendar.html")
 
+@app.route('/edit_event')
+def edit_event():
+    return render_template('edit_event.html')
+
 #temporary route for proof of concept
 @app.route('/eventsday1')
 def eventsday1():
