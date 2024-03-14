@@ -25,7 +25,8 @@
   <link href="static/assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
   <!-- MAKE INTO BLOCK LATER -->
   <!-- Template Main CSS File -->
-  <link href="static/assets/css/style.css" rel="stylesheet">
+  {%block main_css%} {%endblock%}
+  
 
   <!-- =======================================================
   * Template Name: FlexStart
@@ -102,7 +103,7 @@
   <div class="container mt-5">
     <div class="row">
       <div class="col-lg">
-        {% with messages = get_flashed_messages(with_categories=true) %}
+      {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
       {% for category, message in messages %}
       <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
@@ -180,6 +181,7 @@
       </div>
     </div>
 
+    
     <div class="container">
       <div class="copyright">
         &copy; Copyright <strong><span>FlexStart</span></strong>. All Rights Reserved
@@ -193,9 +195,9 @@
       </div>
     </div>
   </footer><!-- End Footer -->
-#}
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+   #}
   <!-- Vendor JS Files -->
   <script src="static/assets/vendor/purecounter/purecounter_vanilla.js"></script>
   <script src="static/assets/vendor/aos/aos.js"></script>
