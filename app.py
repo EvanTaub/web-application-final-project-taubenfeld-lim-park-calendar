@@ -1,5 +1,6 @@
 from flask import Flask, render_template, flash, url_for, request, redirect
 import re
+import flask_login
 app = Flask(__name__)
 
 
@@ -19,15 +20,11 @@ def login():
 def calendar():
     return render_template("calendar.html")
 
-@app.route('/edit_event')
-def edit_event():
-    return render_template('edit_event.html')
 
-#temporary route for proof of concept
-@app.route('/eventsday1')
-def eventsday1():
-    return render_template('sampledate.html')
-
+@app.route("/edit")
+# @login_required
+def edit():
+    return render_template("edit.html")
 
 
 # edit / add / profile 
