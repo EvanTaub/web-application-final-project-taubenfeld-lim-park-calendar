@@ -8,6 +8,17 @@ app = Flask(__name__)
 def index():
     return render_template("index.html")
 
+
+@app.route('/edit_event')
+def edit_event():
+    return render_template('edit_event.html')
+
+#temporary route for proof of concept
+@app.route('/eventsday1')
+def eventsday1():
+    return render_template('sampledate.html')
+
+
 @app.route("/register")
 def register():
     return render_template("register.html")
