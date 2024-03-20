@@ -1,0 +1,26 @@
+{%extends "base.html"%}
+{%block title%}LOGIN{%endblock%}
+{%set active_page = 'login'%}
+{%block content%}
+<!-- ========================= hero-2 start ========================= -->
+  <main class="form-signin " >
+  <form method="POST" action="/login">
+    <!-- <img class="mb-4 text-align-center" src="static\assets\img\addition\signin.webp" alt="" width="50%" > -->
+    <div class="form-floating mb-1">
+      <input type="email" class="form-control" id="floatingInput" placeholder="Email address" name="email" required>
+    </div>
+    <div class="form-floating">
+      <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password" required>
+    </div>
+
+    <div class="checkbox mb-3">
+      <label>
+        <input type="checkbox" value="remember-me"> Remember me
+      </label>
+    </div>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+  </form>
+</main>
+</div>
+<!-- ========================= hero-2 end ========================= -->
+{%endblock%}
