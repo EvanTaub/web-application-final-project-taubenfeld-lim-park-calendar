@@ -114,8 +114,12 @@ def login():
             return render_template('index.html')
     return render_template("login.html")
 
-@login_required
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 @app.route('/logout')
+@login_required
 def logout():
     logout_user()
     flash("Successfully Logged Out!", 'success')
