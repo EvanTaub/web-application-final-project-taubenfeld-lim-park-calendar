@@ -24,6 +24,14 @@ from PIL import Image
 
 
 app = Flask(__name__)
+app.secret_key ='soujgpoisefpowigmppwoigvhw0wefwefwogihj'
+
+# Establish login
+login_manager = LoginManager(app)
+login_manager.login_view = "login"
+login_manager.login_message = "Unauthorized Access. Please Login!"
+login_manager.login_message_category = 'danger'
+
 
 # Setup the database
 app["SQLALCHEMY_DATABASE_URI"] = "sqlite:///calendar.db"
@@ -54,7 +62,18 @@ class User(db.Model):
     def __repr__(self):
         return f"ID: {self.id}\n First Name: {self.first_name}\n Last Name: {self.last_name}\n Email: {self.email}\n Account Type: {self.account_type} "
 
+# def generate_verification_token():
+#     return secrets.token_urlsafe(50)  # Adjust the token length as needed
 
+
+# # Send a Verification Email:
+# def send_verification_email(user):
+#     verification_link = (
+#         f"http://127.0.0.1:5000/verify_email/{user.email_verification_token}"
+#     )
+#     msg = Message("Verify Your Email", recipients=[user.email])
+#     msg.body = f"Click the following link to verify your email: {verification_link}"
+#     mail.send(msg)
 
 @app.route("/")
 def index():
@@ -81,7 +100,20 @@ def login():
         return render_template('login.html')
     if request.method == "POST":
         email = request.form.get('email')
+        password = request.form.get('password')
+        user = User.query.filter_by(email = email).first()
+        if user and user.check_password(password):
+            login_user(user)
+            flash("Logged in successfully!", 'success')
+            return render_template('index.html')
     return render_template("login.html")
+
+@login_required
+@app.route('/logout')
+def logout():
+    logout_user()
+    flash("Successfully Logged Out!", 'success')
+    return redirect(url_for('index'))
 
 @app.route("/calendar")
 def calendar():
@@ -92,6 +124,10 @@ def calendar():
 # @login_required
 def edit():
     return render_template("edit.html")
+
+@app.route('/verify_email')
+def email_verification():
+    pass
 
 
 # edit / add / profile 
