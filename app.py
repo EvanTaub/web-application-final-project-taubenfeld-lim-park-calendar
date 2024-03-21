@@ -34,7 +34,7 @@ login_manager.login_message_category = 'danger'
 
 
 # Setup the database
-app["SQLALCHEMY_DATABASE_URI"] = "sqlite:///calendar.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///calendar.db"
 db = SQLAlchemy(app)
 
 
@@ -61,6 +61,12 @@ class User(db.Model):
     
     def __repr__(self):
         return f"ID: {self.id}\n First Name: {self.first_name}\n Last Name: {self.last_name}\n Email: {self.email}\n Account Type: {self.account_type} "
+
+
+with app.app_context():
+    db.create_all()
+
+
 
 # def generate_verification_token():
 #     return secrets.token_urlsafe(50)  # Adjust the token length as needed
