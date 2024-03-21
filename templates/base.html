@@ -51,17 +51,17 @@
 
       <nav id="navbar" class="navbar">
         <ul>
-          <li><a class="nav-link scrollto active" href="/">Home</a></li>
-          <li class="dropdown"><a href="#"><span>Calendar</span> <i class="bi bi-chevron-down"></i></a>
+          <li><a class="nav-link scrollto {{'active' if active_page == 'index'}}" href="/">Home</a></li>
+          <li class="dropdown"><a href="#" class = "{{'active' if active_page == 'calendar'}}"><span>Calendar</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
               <li><a href="/calendar">View Calendar</a></li>
               <li><a href="/add">Add Events</a></li>
               <li><a href="/edit">Edit Events</a></li> <!-- Admin access only-->
             </ul>
           </li>
-          <li><a href="/newsletter">School Newsletter</a></li>
-          <li><a href="/login">Login</a></li> <!-- if user is not logged in-->
-          <li><a href="/profile">Profile</a></li> <!-- if user is logged in-->
+          <li><a href="/newsletter" class = "{{'active' if active_page == 'newsletter'}}">School Newsletter</a></li>
+          <li><a href="/login" class = "{{'active' if active_page == 'login'}}" >Login</a></li> <!-- if user is not logged in-->
+          <li><a href="/profile" class = "{{'active' if active_page == 'profile'}}">Profile</a></li> <!-- if user is logged in-->
           
           {#
           <li class="dropdown megamenu"><a href="#"><span>Mega Menu</span> <i class="bi bi-chevron-down"></i></a>
