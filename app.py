@@ -96,9 +96,12 @@ def eventsday1():
     return render_template('sampledate.html')
 
 
-@app.route("/register")
+@app.route("/register", methods = ["GET","POST"])
 def register():
-    return render_template("register.html")
+    if request.method == 'GET':
+        return render_template("register.html")
+    if request.method == "POST":
+        pass
 
 @app.route("/login", methods = ["GET", "POST"])
 def login():
