@@ -1,129 +1,113 @@
 {%extends "base.html"%}
-{%block title%}REGISTER{%endblock%}
-{%set active_page = 'home'%}
+{%block title%}Calendar{%endblock%}
+{%block main_css%} <link href="static/assets/css/style.css" rel="stylesheet"> {%endblock%}
+{%set active_page = 'login' %}
 {%block content%}
-<!-- ========================= hero-2 start ========================= -->
-      <section class="vh-350 mt-5" style="background-color: #eee; ">
-        <div class="container ">
-          <div class="row d-flex justify-content-center align-items-center h-100">
-            <div class="col-lg-12 col-xl-11">
-              {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-              {% for category, message in messages %}
-              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                 <strong>{{ message }}</strong>
-                 <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
-              </div>
-              {% endfor %}
-              {% endif %}
-              {% endwith %}
-              <div class="card text-black" style="border-radius: 25px;">
-                <div class="card-body p-md-5">
-                  <div class="row justify-content-center">
-                    <div class="col-md-10 col-lg-6 col-xl-5 order-2 order-lg-1">
-      
-                      <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
-      
-                      <form class="mx-1 mx-md-4" enctype="multipart/form-data" method="POST" action="/register">
 
-                        <div class="input-group mb-3">
-                          <span class="input-group-text" id="basic-addon1">
-                            <i class="fa-sharp fa-regular fa-id-card"></i>
-                          </span>
-                          <input type="file" class="form-control" name="image" accept=".jpg, .png" aria-describedby="basic-addon1" required>
-                        </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Login V1</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================-->	
+	<link rel="icon" type="image/png" href="static/assets/images/icons/favicon.ico"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="static/assets/vendor/bootstrap/css/bootstrap.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="static/assets/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="static/assets/vendor/animate/animate.css">
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="static/assets/vendor/css-hamburgers/hamburgers.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="static/assets/vendor/select2/select2.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="static/assets/css/util.css">
+	<link rel="stylesheet" type="text/css" href="static/assets/css/main.css">
+<!--===============================================================================================-->
+</head>
+<body>
+	
+	<div class="limiter">
+		<div class="container-login100">
+			<div class="wrap-login100">
+				<div class="login100-pic js-tilt" data-tilt>
+					<img src="static/assets/img/bt logo.png" alt="IMG">
+				</div>
 
-                        <div class="input-group mb-3">
-                          <span class="input-group-text" id="basic-addon1">
-                            <i class="fas fa-user fa-lg me-3 fa-fw"></i>
-                          </span>
-                          <input type="text" class="form-control" placeholder="First Name" name="name" aria-describedby="basic-addon1" required>
-                        </div>
+				<form action = "/login" method = "Post" class="login100-form validate-form">
+					<span class="login100-form-title">
+						Register
+					</span>
 
-                        <div class="input-group mb-3">
-                          <span class="input-group-text" id="basic-addon1">
-                            <i class="fas fa-user fa-lg me-3 fa-fw"></i>
-                          </span>
-                          <input type="text" class="form-control" placeholder="Last Name" name="last_name" aria-describedby="basic-addon1" required>
-                        </div>
+					<div class="wrap-input100 validate-input" data-validate = "First Name is required">
+						<input class="input100" type="text" name="first-name" placeholder="First Name">
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-envelope" aria-hidden="true"></i>
+						</span>
+					</div>
 
-                        <div class="input-group mb-3">
-                          <span class="input-group-text" id="basic-addon1">
-                            <i class="fas fa-envelope fa-lg me-3 fa-fw"></i>                          </span>
-                          <input type="email" class="form-control" placeholder="Your Email" name="email" aria-describedby="basic-addon1" required>
-                        </div>
+					<div class="wrap-input100 validate-input" data-validate = "Last Name is required">
+						<input class="input100" type="text" name="last-name" placeholder="Last Name">
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-envelope" aria-hidden="true"></i>
+						</span>
+					</div>
 
-                        <div class="input-group mb-3">
-                          <span class="input-group-text" id="basic-addon1">
-                            <i class="fas fa-lock fa-lg me-3 fa-fw"></i>                         </span>
-                          <input type="password" class="form-control" placeholder="Password" name="password" aria-describedby="basic-addon1" required>
-                        </div>
+					<div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
+						<input class="input100" type="text" name="email" placeholder="Email">
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-envelope" aria-hidden="true"></i>
+						</span>
+					</div>
 
-                        <div class="input-group mb-3">
-                          <span class="input-group-text" id="basic-addon1">
-                            <i class="fas fa-key fa-lg me-3 fa-fw"></i>                        </span>
-                          <input type="password" class="form-control" placeholder="Confirm password" name="confirm_password" aria-describedby="basic-addon1" required>
-                        </div>
+					<div class="wrap-input100 validate-input" data-validate = "Password is required">
+						<input class="input100" type="password" name="password" placeholder="Password">
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-lock" aria-hidden="true"></i>
+						</span>
+					</div>
+					
+					<div class="container-login100-form-btn">
+						<button type = "submit" class="login100-form-btn">
+							Register
+						</button>
+					</div>
 
-                        <div class="form-check">
-                          <input class="form-check-input" type="checkbox" value="True" name = "accept_terms" id="flexCheckDefault" required>
-                          <label class="form-check-label" for="flexCheckDefault">
-                            I agree all statements in <a href="#!">Terms of service</a>
-                          </label>
-                        </div>
+					
 
-                        <div class="form-check form-switch">
-                          <input class="form-check-input" type="checkbox" role="switch" value="True" name="mfa" id="mfaCheckbox">
-                          <label class="form-check-label" for="flexCheckDefault">
-                            Enable Multifactor Authentication (MFA) 
-                          </label>
-                        </div>
+					
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	
 
-                        <div class="form-check" id="phoneNumberDiv">
-                          <input type="number" class="form-control" placeholder="Phone Number (include country code in beginning)" name="phone_number" aria-describedby="basic-addon1" required>
-                        </div>
-      
-                        <div class="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
-                          <button type="submit" class="btn btn-primary btn-lg">Register</button>
-                        </div>
-      
-                      </form>
-      
-                    </div>
-                    <div class="col-md-10 col-lg-6 col-xl-7 d-flex align-items-center order-1 order-lg-2">
-      
-                      <img src="static\assets\img\addition\register.webp"
-                        class="img-fluid" alt="Sample image">
-      
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-<!-- ========================= hero-2 end ========================= -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var mfaCheckbox = document.getElementById('mfaCheckbox');
-    var phoneNumberDiv = document.getElementById('phoneNumberDiv');
+	
+<!--===============================================================================================-->	
+	<script src="static/assets/vendor/jquery/jquery-3.2.1.min.js"></script>
+<!--===============================================================================================-->
+	<script src="static/assets/vendor/bootstrap/js/popper.js"></script>
+	<script src="static/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+<!--===============================================================================================-->
+	<script src="static/assets/vendor/select2/select2.min.js"></script>
+<!--===============================================================================================-->
+	<script src="static/assets/vendor/tilt/tilt.jquery.min.js"></script>
+	<script >
+		$('.js-tilt').tilt({
+			scale: 1.1
+		})
+	</script>
+<!--===============================================================================================-->
+	<script src="static/assets/js/login.js"></script>
 
-    // Function to toggle phone number visibility
-    function togglePhoneNumber() {
-      if (mfaCheckbox.checked) {
-        phoneNumberDiv.style.display = 'block';
-      } else {
-        phoneNumberDiv.style.display = 'none';
-      }
-    }
-
-    // Call the function initially to set the correct state
-    togglePhoneNumber();
-
-    // Add event listener
-    mfaCheckbox.addEventListener('change', togglePhoneNumber);
-  });
-</script>
+</body>
+</html>
 
 {%endblock%}

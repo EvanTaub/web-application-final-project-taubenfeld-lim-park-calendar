@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
+
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 import os, io
@@ -12,11 +14,15 @@ from flask_mail import Mail
 from flask_mail import Message
 from flask_login import LoginManager, UserMixin
 from flask_login import login_user, current_user, logout_user, login_required
-import random
-# twilio test
-from twilio.rest import Client
 import base64, io
 from PIL import Image
+
+
+import random
+# twilio test
+
+
+from twilio.rest import Client
 
 
 
@@ -86,22 +92,35 @@ def index():
     return render_template("index.html")
 
 
-@app.route('/edit_event')
-def edit_event():
-    return render_template('edit_event.html')
-
-#temporary route for proof of concept
-@app.route('/eventsday1')
-def eventsday1():
-    return render_template('sampledate.html')
-
 
 @app.route("/register", methods = ["GET","POST"])
 def register():
     if request.method == 'GET':
         return render_template("register.html")
     if request.method == "POST":
-        pass
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('first_name')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        verify_password = request.form.get('v_password')
+        user = User.query.filter_by(emal = email).first()
+        if user:
+            flash('User with this email already Exists!', 'warning')
+            return redirect(url_for('register'))
+        if password != verify_password:
+            flash('Passwords are not the same','danger')
+            return redirect(url_for('register'))
+        new_user = User(
+            first_name = first_name,
+            last_name = last_name,
+            email = email,
+            password_hash = generate_password_hash(password)
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('index'))
+
+        
 
 @app.route("/login", methods = ["GET", "POST"])
 def login():
@@ -128,9 +147,9 @@ def logout():
     flash("Successfully Logged Out!", 'success')
     return redirect(url_for('index'))
 
-@app.route("/calendar")
-def calendar():
-    return render_template("calendar.html")
+@app.route('/events')
+def Event():
+    return render_template('edit_event.html')
 
 
 @app.route("/edit")
