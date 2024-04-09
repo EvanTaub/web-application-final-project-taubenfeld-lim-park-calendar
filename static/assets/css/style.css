@@ -2516,4 +2516,37 @@ div.event-list {
   font-size: 60px
 }
 
+/* .card p {
+  
+} */
 
+/* EVENTS LIST CSS*/
+
+.row-events {
+  margin-top: 30px;
+}
+
+.card-event {
+  padding-top: 15px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-bottom: 15px;
+  
+}
+
+.event-title {
+  font-family: "Poppins";
+  font-size: 20px;
+  text-decoration: underline;
+}
+
+.event-desc {
+  /*hey :)  nothing to add here yet..*/
+}
+
+.event-img {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  height: 80 px;
+}

@@ -1,7 +1,7 @@
 {%extends "base.html"%}
 {%block title%}Calendar{%endblock%}
 {%block main_css%} <link href="static/assets/css/style.css" rel="stylesheet"> {%endblock%}
-{%set active_page = 'login' %}
+{%set active_page = 'register' %}
 {%block content%}
 
 <!DOCTYPE html>
@@ -26,8 +26,22 @@
 	<link rel="stylesheet" type="text/css" href="static/assets/css/util.css">
 	<link rel="stylesheet" type="text/css" href="static/assets/css/main.css">
 <!--===============================================================================================-->
-</head>
+	 	{%block FLASH%}
+		 {% with messages = get_flashed_messages(with_categories=true) %}
+		 {% if messages %}
+		 {% for category, message in messages %}
+		 <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+			<strong>{{ message }}</strong>
+			<button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+		 </div>
+		 {% endfor %}
+		 {% endif %}
+		 {% endwith %}
+		{%endblock%}
+	</head>
 <body>
+
+	
 	
 	<div class="limiter">
 		<div class="container-login100">
@@ -36,7 +50,9 @@
 					<img src="static/assets/img/bt logo.png" alt="IMG">
 				</div>
 
-				<form action = "/login" method = "Post" class="login100-form validate-form">
+				
+
+				<form action = "/register" method = "POST" class="login100-form validate-form">
 					<span class="login100-form-title">
 						Register
 					</span>
@@ -67,6 +83,14 @@
 
 					<div class="wrap-input100 validate-input" data-validate = "Password is required">
 						<input class="input100" type="password" name="password" placeholder="Password">
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-lock" aria-hidden="true"></i>
+						</span>
+					</div>
+
+					<div class="wrap-input100 validate-input" data-validate = "Password is required">
+						<input class="input100" type="password" name="v_password" placeholder="Verify Password">
 						<span class="focus-input100"></span>
 						<span class="symbol-input100">
 							<i class="fa fa-lock" aria-hidden="true"></i>

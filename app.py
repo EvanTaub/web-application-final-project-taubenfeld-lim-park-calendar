@@ -25,48 +25,19 @@ import random
 from twilio.rest import Client
 
 
+from account_management import login_main, logout_main, register_main
 
+from database import configure_app
 
-
-
-app = Flask(__name__)
-app.secret_key ='soujgpoisefpowigmppwoigvhw0wefwefwogihj'
-
-# Establish login
-login_manager = LoginManager(app)
-login_manager.login_view = "login"
-login_manager.login_message = "Unauthorized Access. Please Login!"
-login_manager.login_message_category = 'danger'
-
-
-# Setup the database
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///calendar.db"
-db = SQLAlchemy(app)
+configure_app()
 
 
 
 
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    first_name = db.Column(db.String(255))
-    last_name = db.Column(db.String(255))
-    email = db.Column(db.String(255), unique = True, nullable = False)
-    password_hash = db.Column(db.String(255), nullable = False)
-    email_verification_token = db.Column(db.String(255))
-    is_verified = db.Column(db.Boolean, default = False)
-    mfa_enabled = db.Column(db.Boolean, default = False)
-    phone_number = db.Column(db.String(10), nullable = False)
-    account_type = db.Column(db.String(255), nullable = False, default = "Student")
 
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
 
-    def check_password(self,password):
-        return check_password_hash(self.password_hash, password)
-    
-    def __repr__(self):
-        return f"ID: {self.id}\n First Name: {self.first_name}\n Last Name: {self.last_name}\n Email: {self.email}\n Account Type: {self.account_type} "
+
 
 
 with app.app_context():
@@ -95,46 +66,13 @@ def index():
 
 @app.route("/register", methods = ["GET","POST"])
 def register():
-    if request.method == 'GET':
-        return render_template("register.html")
-    if request.method == "POST":
-        first_name = request.form.get('first_name')
-        last_name = request.form.get('first_name')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        verify_password = request.form.get('v_password')
-        user = User.query.filter_by(emal = email).first()
-        if user:
-            flash('User with this email already Exists!', 'warning')
-            return redirect(url_for('register'))
-        if password != verify_password:
-            flash('Passwords are not the same','danger')
-            return redirect(url_for('register'))
-        new_user = User(
-            first_name = first_name,
-            last_name = last_name,
-            email = email,
-            password_hash = generate_password_hash(password)
-        )
-        db.session.add(new_user)
-        db.session.commit()
-        return redirect(url_for('index'))
+    register_main()
 
         
 
 @app.route("/login", methods = ["GET", "POST"])
 def login():
-    if request.method == "GET":
-        return render_template('login.html')
-    if request.method == "POST":
-        email = request.form.get('email')
-        password = request.form.get('password')
-        user = User.query.filter_by(email = email).first()
-        if user and user.check_password(password):
-            login_user(user)
-            flash("Logged in successfully!", 'success')
-            return render_template('index.html')
-    return render_template("login.html")
+    login_main()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -143,13 +81,11 @@ def load_user(user_id):
 @app.route('/logout')
 @login_required
 def logout():
-    logout_user()
-    flash("Successfully Logged Out!", 'success')
-    return redirect(url_for('index'))
+    logout_main()
 
 @app.route('/events')
 def Event():
-    return render_template('edit_event.html')
+    return render_template('events.html')
 
 
 @app.route("/edit")
