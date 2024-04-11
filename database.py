@@ -1,23 +1,48 @@
-from flask_login import LoginManager, UserMixin
-from flask_login import login_user, current_user, logout_user, login_required
+
 from flask import Flask, render_template, request, redirect, url_for, flash, session
+
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
+import os, io
+from werkzeug.utils import secure_filename
+import csv
+from sqlalchemy import desc, asc
+from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+import secrets
+from flask_mail import Mail
+from flask_mail import Message
+from flask_login import LoginManager, UserMixin
+from flask_login import login_user, current_user, logout_user, login_required
+import base64, io
+from PIL import Image
 
-def configure_app():
-    global app
-    app = Flask(__name__)
-    app.secret_key ='soujgpoisefpowigmppwoigvhw0wefwefwogihj'
 
-    # Establish login
-    global login_manager
-    login_manager = LoginManager(app)
-    login_manager.login_view = "login"
-    login_manager.login_message = "Unauthorized Access. Please Login!"
-    login_manager.login_message_category = 'danger'
+import random
+# twilio test
 
 
-    # Setup the database
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///calendar.db"
-    global db
-    db = SQLAlchemy(app)
+from twilio.rest import Client
+
+from extensions import db  # Adjust the import path as necessary
+
+
+
+app = Flask(__name__)
+app.secret_key ='soujgpoisefpowigmppwoigvhw0wefwefwogihj'
+
+# Establish login
+login_manager = LoginManager(app)
+
+
+
+
+
+
+# Setup the database
+# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///calendar.db"
+# db = SQLAlchemy(app)
+
+# with app.app_context():
+#     db.create_all()

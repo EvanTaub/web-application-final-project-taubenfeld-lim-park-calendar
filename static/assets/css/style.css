@@ -2541,12 +2541,38 @@ div.event-list {
 }
 
 .event-desc {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease;
   /*hey :)  nothing to add here yet..*/
 }
 
 .event-img {
-  background-size: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  background-size: contain;
   background-repeat: no-repeat;
   background-position: center center;
-  height: 80 px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 }
+
+.animate {
+  max-height: 200px;
+}
+
+.event-content {
+  margin-top: 20%;
+}
+/* 
+@keyframes animation {
+  from {
+    bottom: -60px;
+  }
+  to {
+    bottom: 120px;
+  }
+} */

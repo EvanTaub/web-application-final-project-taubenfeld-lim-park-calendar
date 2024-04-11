@@ -24,24 +24,38 @@ import random
 
 from twilio.rest import Client
 
+from database import login_manager
+from account_management import login_management, logout_main, register_main, load_user_main
+from classes import User
 
-from account_management import login_main, logout_main, register_main
-
-from database import configure_app
-
-configure_app()
-
+from extensions import db, login_manager  # Adjust the import path as necessary
 
 
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'soujgpoisefpowigmppwoigvhw0wefwefwogihj'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///calendar.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-
-
-
-
+db.init_app(app)
+login_manager.init_app(app)
+login_manager.login_view = "login"
+login_manager.login_message = "Unauthorized Access. Please Login!"
+login_manager.login_message_category = 'danger'
 
 
 with app.app_context():
     db.create_all()
+
+# Here you can register your blueprints or routes
+
+
+
+
+
+
+
+
+
 
 
 
@@ -66,22 +80,35 @@ def index():
 
 @app.route("/register", methods = ["GET","POST"])
 def register():
-    register_main()
+    if request.method == "GET":
+        return render_template('register.html')
+    if request.method == "POST":
+        new_user = register_main()
+        if isinstance(new_user,User):
+            db.session.add(new_user)
+            db.session.commit()
+        return redirect(url_for('index'))
 
         
 
 @app.route("/login", methods = ["GET", "POST"])
 def login():
-    login_main()
+    if request.method == "GET":
+        return render_template("login.html") 
+    if request.method == "POST":
+        login_management()
+        return redirect(url_for('login'))
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    load_user_main(user_id)
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_main()
+    return redirect(url_for('index'))
+
 
 @app.route('/events')
 def Event():
