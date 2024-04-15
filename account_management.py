@@ -15,13 +15,12 @@ def register_main():
     password = request.form.get('password')
     verify_password = request.form.get('v_password')
     user = User.query.filter_by(email = email).first()
-    print(user)
     if user:
-        flash('User with this email already Exists!', 'warning')
-        return redirect(url_for('register'))
+        flash_message = ['User with this email already Exists!','warning']
+        return flash_message
     if password != verify_password:
-        flash('Passwords are not the same','danger')
-        return redirect(url_for('register'))
+        flash_message = ['Passwords are not the same','danger']
+        return flash_message
     
     new_user = User(
         first_name = first_name,
@@ -36,13 +35,10 @@ def login_management():
     email = request.form.get('email')
     password = request.form.get('password')
     user = User.query.filter_by(email=email).first()
-    print(user)
-    print(user.check_password(password))
     if user and user.check_password(password):
-        print("True")
-        login_user(user)
-        flash("Logged in successfully!", 'success')
-        return render_template('index.html')
+        return [True, user]
+    else:
+        return [False]
     
 
 def load_user_main(user_id):

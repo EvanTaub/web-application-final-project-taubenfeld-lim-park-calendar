@@ -83,10 +83,13 @@ def register():
     if request.method == "GET":
         return render_template('register.html')
     if request.method == "POST":
-        new_user = register_main()
-        if isinstance(new_user,User):
-            db.session.add(new_user)
+        register_item = register_main()
+        if isinstance(register_item,User):
+            db.session.add(register_item)
             db.session.commit()
+        else:
+            flash(register_item[0],register_item[1])
+            return redirect(url_for('register'))
         return redirect(url_for('index'))
 
         
@@ -96,12 +99,19 @@ def login():
     if request.method == "GET":
         return render_template("login.html") 
     if request.method == "POST":
-        login_management()
-        return redirect(url_for('login'))
+        var = login_management()
+        if var[0]:
+            login_user(var[1])
+            flash('Logged In Successfully!','success')
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid Credentials','danger')
+            return redirect(url_for('login'))
+        
 
 @login_manager.user_loader
 def load_user(user_id):
-    load_user_main(user_id)
+    return User.query.get(int(user_id))
 
 @app.route('/logout')
 @login_required

@@ -52,6 +52,7 @@
       <nav id="navbar" class="navbar">
         <ul>
           <li><a class="nav-link scrollto {{'active' if active_page == 'index'}}" href="/">Home</a></li>
+          {%if True%}
           <li class="dropdown"><a href="#" class = "{{'active' if active_page == 'events'}}"><span>Events</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
               <li><a href="/events">View Events</a></li>
@@ -59,9 +60,13 @@
               <li><a href="/edit">Edit Events</a></li> <!-- Admin access only-->
             </ul>
           </li>
+          {%else%}
+          <li><a href="/events" class = "{{'active' if active_page == 'events'}}">Events</a></li>
+          {%endif%}
           <li><a href="/newsletter" class = "{{'active' if active_page == 'newsletter'}}">School Newsletter</a></li>
           {%if current_user.is_authenticated%}
           <li><a href="/profile" class = "{{'active' if active_page == 'profile'}}">Profile</a></li> <!-- if user is logged in-->
+          <li><a href="/logout" class = "{{'active' if active_page == 'logout'}}" >Logout</a></li> <!-- if user is logged in-->
           {%else%} 
           <li><a href="/register" class = "{{'active' if active_page == 'register'}}" >Register</a></li> <!-- if user is not logged in-->
           <li><a href="/login" class = "{{'active' if active_page == 'login'}}" >Login</a></li> <!-- if user is not logged in-->
@@ -101,7 +106,7 @@
 
     </div>
   </header><!-- End Header -->
-
+  <div style="padding-top:50px"> </div> 
   <!-- FLASH MESSAGES! -->
   <div class="container mt-5">
     <div class="row">
@@ -117,10 +122,7 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-        {%else%}
-        {%block FLASH%}
-        {%endblock%}
-      {%endif%}
+        {%endif%}
     </div>
   </div>
 </div>
@@ -204,6 +206,7 @@
     </div>
   </footer><!-- End Footer -->
 
+  
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
    #}
   <!-- Vendor JS Files -->
@@ -214,6 +217,22 @@
   <script src="static/assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
   <script src="static/assets/vendor/swiper/swiper-bundle.min.js"></script>
   <script src="static/assets/vendor/php-email-form/validate.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get all the close buttons
+        var closeButtons = document.querySelectorAll('.btn-close');
+
+        // Add click event listener to each close button
+        closeButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                // Find the parent alert div and hide it
+                var alertDiv = this.closest('.alert');
+                alertDiv.style.display = 'none';
+            });
+        });
+    });
+</script>
 
   <!-- Template Main JS File -->
   <script src="static/assets/js/main.js"></script>
