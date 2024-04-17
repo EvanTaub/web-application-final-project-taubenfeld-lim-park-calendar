@@ -10,7 +10,7 @@ function toggleAnimation(event) {
 }
 
 for (let i = 0; i < event_cards.length; i++){
-    event_cards[i].addEventListener("click", toggleAnimation)
+    event_cards[i].addEventListener("hover", toggleAnimation)
 }
 
 // function hide() {

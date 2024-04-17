@@ -27,6 +27,7 @@ class User(db.Model, UserMixin):
     mfa_enabled = db.Column(db.Boolean, default = False)
     phone_number = db.Column(db.String(10), nullable = False, default = '')
     account_type = db.Column(db.String(255), nullable = False, default = "Student")
+    teacher_id = db.relationship('ProjectWednesday',)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -36,3 +37,27 @@ class User(db.Model, UserMixin):
     
     def __repr__(self):
         return f"ID: {self.id}\n First Name: {self.first_name}\n Last Name: {self.last_name}\n Email: {self.email}\n Account Type: {self.account_type} "
+class Event(db.Model, UserMixin):
+    id = db.Column(db.Integer, nullable = False)
+    teacher_id = db.Column(db.Integer,db.ForeignKey('user.id'), nullable = False)
+    name = db.Column(db.String(255), nullable = False, default = 'null')
+    description = db.Column(db.String(350), nullable = False, default = 'null')
+    image = db.Column(db.LargeBinary)
+
+
+class ProjectWednesday(Event):
+    cycle_number = db.Column(db.Integer, default = 1, nullable = False)
+
+# class Tournaments(db.Model, UserMixin):
+#     id = db.Column(db.Integer, nullable = False)
+#     user_id = db.Column(db.Integer,db.ForeignKey('user.id'), nullable = False)
+#     name = db.Column(db.String(255), nullable = False, default = 'null')
+#     description = db.Column(db.String(350), nullable = False, default = 'null')
+#     image = db.Column(db.LargeBinary)
+#     entry_fee = db.Column(db.Integer,nullable = False, default = 1)
+#     format = db.Column(db.String(255), nullable = False, default = 'Single Eliminations')
+#     date = db.Column(db.String(255), nullable = False, default = '01/01/1970')
+
+
+# https://chat.openai.com/share/a4b6b170-4dda-4a3b-b0af-bf9cc38e19af
+# chatgpt log for the query
