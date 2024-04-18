@@ -34,18 +34,27 @@
                  <label for="floatingInput"></label>
               </div>
               <!-- Make two options for date (a physical manual description vs. a set date time) -->
-              <!-- <div class="form-floating mb-3 d-flex justify-content-center">
-                 <input type="date" class="form-control" id="floatingInput" placeholder="Event Date" name='p_date'
+              <div class="event-date-classification">
+                  <div class="form-floating mb-3 d-flex justify-content-center">
+                     <input type="radio" class="form-control"
+              <!-- <div class="form-floating mb-3 d-flex justify-content-center date-description">
+                 <input type="date" class="form-control" id="floatingInput" placeholder="Event Date" name='event_date'
                     required>
                  <label for="floatingInput"></label>
               </div> -->
+              <!-- <div class="form-floating mb-3 d-flex justify-content-center date-description-manual">
+               <input type="text" class="form-control" id="floatingInput" placeholder="Description (350 characters max)" name='event_description' maxlength="350">
+               <label for="floatingInput"></label>
+               </div> -->
+            </div>
+
               <div class="form-floating mb-3 d-flex justify-content-center">
                  <input type="text" class="form-control" id="floatingInput" placeholder="Description (350 characters max)" name='event_description' maxlength="350">
                  <label for="floatingInput"></label>
               </div>
   
               <div class="d-grid gap-2 col-8 mx-auto my-auto">
-                 <button type="submit" class="btn btn-secondary btn-lg">ADD EVENT</button>
+                 <button type="submit" class="btn btn-secondary btn-lg" name="add_event">ADD EVENT</button>
               </div>
            </div>
   

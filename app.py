@@ -121,14 +121,29 @@ def logout():
 
 
 @app.route('/events')
-def Event():
-    return render_template('events.html')
+def event():
+    if request.method == "GET":
+        return render_template('events.html')
+    if request.method == "POST":
+        if "add_event" in request.form:
+            event_title = request.form.get('event_title')
+            event_type = request.form.get('event_type')
+            event_description = request.form.get('event_description')
+            
+            return render_template('events.html')
+        if "edit_event" in request.form:
+            pass
+            return render_template('events.html')
 
+@app.route("/add")
+# @login_required
+def add():
+    return render_template("add-events.html")
 
 @app.route("/edit")
 # @login_required
 def edit():
-    return render_template("edit.html")
+    return render_template("edit_event.html")
 
 @app.route('/verify_email')
 def email_verification():

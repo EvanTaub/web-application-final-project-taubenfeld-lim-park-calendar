@@ -1,44 +1,62 @@
 {%extends "base.html"%}
-{%block title%}EDIT{%endblock%}
-{%block main_css%} <link href="static/assets/css/style.css" rel="stylesheet"> {%endblock%}
-{%set active_page = 'calendar'%}
-{%block content%} <h1 style="text-align:center">Event 2</h1>
-<style>
-    .long-input {
-        width: 500px; /* Adjust this value as needed */
-        height:200px;
-    }
-</style>
-<div class="row">
-<div class="col-lg-12 d-flex flex-column justify-content-center">
-    <form action="/edit_event" method = "POST" style = "text-align: center;">
-        <div> 
-        <label for = "date"> Date </label> 
-        <input name = "date" type="date" readonly required>
-        </div>
-        <div> 
-            <label for = "room"> Room </label> 
-            <input name = "room" type="text" value = "513A" readonly required>
-        </div>
-        <!-- Label to the top side of textarea NOT bottom. -->
-        <div> 
-            <label for = "desc"> Description (350 Character Limit) </label> 
-            <textarea name = "desc" type="text" placeholder = "Enter Decription Here"  rows = "4" cols = "50" maxlength="350" style = "resize:none;" readonly>Computer Science Presentation</textarea>
-        </div>
-        <div> 
-            <label for = "start_time"> Start Time </label> 
-            <input name = "start_time" type="time" value = "09:45" readonly required>
-        </div>
-        <div> 
-            <label for = "end_time"> End Time </label> 
-            <input name = "end_time" type="time" value = "10:26" readonly required>
-        </div>
-        <!-- Only show this submit button if the account type is admin or above in clearance level-->
-        <div> 
-            <button class="w-10 btn btn-lg btn-primary" type="submit" readonly>Edit Event</button>
-        </div>
+{%block title%} EVENTS {%endblock%}
+{%set active_page='events'%}
+{%block content%} 
 
-    </form>
-    </div>
-</div>
+<form method="POST" action="/events">
+    <div class="container justify-content-center ">
+        <div class="row">
+           <div class="col mt-3 py-2">
+              <h1 class="display-4">Edit the event! </h1>
+              <!-- {%if msg != ''%}
+              <div class="alert alert-success alert-dismissible fade show" role="alert">
+                 <strong>{{msg}}</strong>
+                 <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+              </div>
+              {%endif%} -->
+           </div>
+        </div>
+        <div class="row ">
+           <div class="col-3 bg-light mt-3 py-2">
+              <div class="form-floating mb-3 d-flex justify-content-center">
+                 <input type="text" class="form-control" id="floatingInput" placeholder="Event Title" name='event_title'
+                    required>
+                 <label for="floatingInput"></label>
+              </div>
+              <div class="form-floating mb-3 d-flex justify-content-center">
+                 <select class="form-select" aria-label="Default select example" name='event_type'>
+                    <option disabled>Event Type</option>
+                    <option value="Project Wednesday">Project Wednesday</option>
+                    <option value="Workshops">Workshops</option>
+                    <option value="Tournaments">Tournaments</option>
+                    <option value="Performances">Performances</option>
+                 </select>
+                 <label for="floatingInput"></label>
+              </div>
+              <!-- Make two options for date (a physical manual description vs. a set date time) -->
+              <!-- <div class="form-floating mb-3 d-flex justify-content-center">
+                 <input type="date" class="form-control" id="floatingInput" placeholder="Event Date" name='p_date'
+                    required>
+                 <label for="floatingInput"></label>
+              </div> -->
+              <div class="form-floating mb-3 d-flex justify-content-center">
+                 <input type="text" class="form-control" id="floatingInput" placeholder="Description (350 characters max)" name='event_description' maxlength="350">
+                 <label for="floatingInput"></label>
+              </div>
+  
+              <div class="d-grid gap-2 col-8 mx-auto my-auto">
+                 <button type="submit" class="btn btn-secondary btn-lg" name="edit_event">ADD EVENT</button>
+              </div>
+           </div>
+  
+           <div class="col-8 mt-3 py-2 text-center">
+              <img src="static\assets\img\bt logo.png" alt="">
+           </div>
+        </div>
+     </div><!-- insert code here at a later time -->
+    
+</form>
+
 {%endblock%}
+{%block main_css%}<link href="static/assets/css/style.css" rel="stylesheet">{%endblock%}
+
