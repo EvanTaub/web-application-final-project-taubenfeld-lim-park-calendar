@@ -32,8 +32,11 @@ class User(db.Model, UserMixin):
     mfa_enabled = db.Column(db.Boolean, default=False)
     phone_number = db.Column(db.String(10), nullable=False, default='')
     account_type = db.Column(db.String(255), nullable=False, default="Student")
+    # Relationship for events joined by the user
+    events_created = db.relationship('Event', secondary=user_event_association, backref='events_joined', lazy='dynamic')
+    
+    # Relationship for events created by the user
     events_created = db.relationship('Event', backref='creator', lazy=True)
-    joined_events = db.relationship('Event', secondary=user_event_association, backref='participants', lazy='dynamic')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -50,12 +53,9 @@ class Event(db.Model, UserMixin):
     name = db.Column(db.String(255), nullable=False, default='null')
     description = db.Column(db.String(350), nullable=False, default='null')
     image = db.Column(db.LargeBinary)
+    student_limit = db.Column(db.Integer, nullable = False)
+    participants = db.relationship('User', secondary=user_event_association, backref=db.backref('events_joined', lazy='dynamic'))
 
-    # Backreference for creator
-    creator_user = db.relationship('User', backref='created_events', foreign_keys=[creator_id])
-
-    # Backreference for participants
-    participants_user = db.relationship('User', secondary=user_event_association, backref='joined_events', lazy='dynamic')
 
 class ProjectWednesday(Event):
     id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
@@ -65,13 +65,4 @@ class Tournaments(Event):
     id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
     cost = db.Column(db.Float, default=1, nullable=False)
 
-# class Tournaments(db.Model, UserMixin):
-#     id = db.Column(db.Integer, nullable = False)
-#     user_id = db.Column(db.Integer,db.ForeignKey('user.id'), nullable = False)
-#     name = db.Column(db.String(255), nullable = False, default = 'null')
-#     description = db.Column(db.String(350), nullable = False, default = 'null')
-#     image = db.Column(db.LargeBinary)
-#     entry_fee = db.Column(db.Integer,nullable = False, default = 1)
-#     format = db.Column(db.String(255), nullable = False, default = 'Single Eliminations')
-#     date = db.Column(db.String(255), nullable = False, default = '01/01/1970')
 

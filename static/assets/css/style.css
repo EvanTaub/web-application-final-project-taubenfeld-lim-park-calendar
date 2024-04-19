@@ -2560,12 +2560,23 @@ div.event-list {
   border-top-right-radius: 10px;
 }
 
+.event-determination-img {
+  margin: auto;
+  width: 60%;
+  height: 60%;
+}
+
 .animate {
   max-height: 200px;
 }
 
 .event-content {
   margin-top: 20%;
+}
+
+.container-determine-event {
+  margin: auto;
+  text-align: center;
 }
 /* 
 @keyframes animation {

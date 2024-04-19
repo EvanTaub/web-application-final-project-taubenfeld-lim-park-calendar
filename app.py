@@ -76,6 +76,10 @@ with app.app_context():
 def index():
     return render_template("index.html")
 
+#temporary route
+@app.route("/test")
+def test():
+    return render_template("event_determination.html")
 
 
 @app.route("/register", methods = ["GET","POST"])
@@ -102,6 +106,7 @@ def login():
         var = login_management()
         if var[0]:
             login_user(var[1])
+            session['id'] = var[1]['id']
             flash('Logged In Successfully!','success')
             return redirect(url_for('index'))
         else:
@@ -138,7 +143,22 @@ def event():
 @app.route("/add")
 # @login_required
 def add():
+    return render_template("event_determination.html")
+
+@app.route("/add/performances")
+# @login_required
+def add_performances():
     return render_template("add-events.html")
+
+@app.route("/add/project_wednesdays")
+# @login_required
+def add_projects():
+    return render_template("add-events.html")
+
+@app.route("/add/tournaments")
+# @login_required
+def add_tournaments():
+    return render_template("add-events.html")=
 
 @app.route("/edit")
 # @login_required
@@ -148,6 +168,46 @@ def edit():
 @app.route('/verify_email')
 def email_verification():
     pass
+
+@app.route('/profile', methods=["GET","POST"])
+@login_required
+def profile():
+    if request.method=='GET':  
+        user = User.query.get(int(session['id']))
+        return render_template('profile.html', user=user)
+    if request.method == "POST":
+        print("ok so something happened")
+        return render_template('profile.html', user=user)
+        # user = User.query.get(int(session['id'])) 
+        # if 'profile_submit' in request.form:
+        #     name = request.form.get('newname')
+        #     last_name = request.form.get('newlastname')
+        #     email = request.form.get('newemail')
+            
+        #     print(name)
+        #     print(last_name)
+        #     print(email)
+        #     if name != '':
+        #         user.name = name
+        #     if last_name != '':
+        #         user.last_name = last_name
+        #     if email != '':
+        #         user.email = email
+        #     db.session.commit()
+        #     flash("Profile Information Edited Successfully!", "success")
+        #     return redirect(url_for('profile'))
+        # elif "password_submit" in request.form:
+        #     new_password = request.form.get("newpass")
+        #     old_password = request.form.get('oldpass')
+        #     if user and user.check_password(old_password):
+        #         print('true')
+        #         user.set_password(new_password)
+        #         db.session.commit()
+        #         flash("Password Successfully Changed!", 'success')
+        #         return redirect(url_for('profile'))
+        #     else:
+        #         flash('Incorrect Password!', 'danger')
+        #         return redirect(url_for('profile'))
 
 
 # edit / add / profile 
