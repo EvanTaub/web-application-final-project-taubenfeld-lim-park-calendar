@@ -25,7 +25,7 @@ import random
 from twilio.rest import Client
 
 from database import login_manager
-from account_management import login_management, logout_main, register_main, load_user_main
+from account_management import login_management, logout_main, register_main, load_user_main, update_credentials
 from classes import User
 
 from extensions import db, login_manager  # Adjust the import path as necessary
@@ -158,7 +158,7 @@ def add_projects():
 @app.route("/add/tournaments")
 # @login_required
 def add_tournaments():
-    return render_template("add-events.html")=
+    return render_template("add-events.html")
 
 @app.route("/edit")
 # @login_required
@@ -172,13 +172,13 @@ def email_verification():
 @app.route('/profile', methods=["GET","POST"])
 @login_required
 def profile():
+    user = User.query.get(int(session['id']))
     if request.method=='GET':  
-        user = User.query.get(int(session['id']))
         return render_template('profile.html', user=user)
     if request.method == "POST":
-        print("ok so something happened")
+        if 'profile_submit' in request.form:
+            update_credentials(user)
         return render_template('profile.html', user=user)
-        # user = User.query.get(int(session['id'])) 
         # if 'profile_submit' in request.form:
         #     name = request.form.get('newname')
         #     last_name = request.form.get('newlastname')
@@ -214,4 +214,4 @@ def profile():
 
 if __name__ == "__main__":
     app.secret_key = "super_secret_key"  # Change this to a random, secure key
-    app.run(debug=True)
+    app.run(port = 5500, debug=True)
