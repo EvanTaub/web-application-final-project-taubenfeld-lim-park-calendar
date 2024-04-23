@@ -2,16 +2,6 @@
 {%block title%}MY PROFILE{%endblock%}
 {%set active_page = 'profile'%}
 {%block content%}
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-       <strong>{{ message }}</strong>
-       <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
 <div class="container rounded bg-white mt-5 mb-5">
     
     <form action="/profile" enctype="multipart/form-data" method = "POST">
@@ -42,7 +32,7 @@
 
                 <form method="POST" action='/profile'>
                 <div class="row mt-2">
-                    <div class="col-md-6"><label class="labels">First Name</label><input type="text" name="newname" class="form-control" placeholder="{{user.name}}" value=""></div>
+                    <div class="col-md-6"><label class="labels">First Name</label><input type="text" name="newfirstname" class="form-control" placeholder="{{user.first_name}}" value=""></div>
                     <div class="col-md-6"><label class="labels">Last Name</label><input type="text" name="newlastname" class="form-control" value="" placeholder="{{user.last_name}}"></div>
                 </div>
                 <div class="row mt-3">
@@ -75,3 +65,5 @@
 </div>
 
 {%endblock%}
+
+{%block main_css%} <link href="{{ url_for('static', filename='assets/css/style.css') }}" rel="stylesheet"> {%endblock%}

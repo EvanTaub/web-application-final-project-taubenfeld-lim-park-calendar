@@ -106,7 +106,8 @@ def login():
         var = login_management()
         if var[0]:
             login_user(var[1])
-            session['id'] = var[1]['id']
+            print(var[1])
+            session['id'] = var[1].id
             flash('Logged In Successfully!','success')
             return redirect(url_for('index'))
         else:
@@ -177,37 +178,37 @@ def profile():
         return render_template('profile.html', user=user)
     if request.method == "POST":
         print("ok so something happened")
-        return render_template('profile.html', user=user)
-        # user = User.query.get(int(session['id'])) 
-        # if 'profile_submit' in request.form:
-        #     name = request.form.get('newname')
-        #     last_name = request.form.get('newlastname')
-        #     email = request.form.get('newemail')
+        # return render_template('profile.html', user=user)
+        user = User.query.get(int(session['id'])) 
+        if 'profile_submit' in request.form:
+            first_name = request.form.get('newfirstname')
+            last_name = request.form.get('newlastname')
+            email = request.form.get('newemail')
             
-        #     print(name)
-        #     print(last_name)
-        #     print(email)
-        #     if name != '':
-        #         user.name = name
-        #     if last_name != '':
-        #         user.last_name = last_name
-        #     if email != '':
-        #         user.email = email
-        #     db.session.commit()
-        #     flash("Profile Information Edited Successfully!", "success")
-        #     return redirect(url_for('profile'))
-        # elif "password_submit" in request.form:
-        #     new_password = request.form.get("newpass")
-        #     old_password = request.form.get('oldpass')
-        #     if user and user.check_password(old_password):
-        #         print('true')
-        #         user.set_password(new_password)
-        #         db.session.commit()
-        #         flash("Password Successfully Changed!", 'success')
-        #         return redirect(url_for('profile'))
-        #     else:
-        #         flash('Incorrect Password!', 'danger')
-        #         return redirect(url_for('profile'))
+            print(first_name)
+            print(last_name)
+            print(email)
+            if first_name != '':
+                user.first_name = first_name
+            if last_name != '':
+                user.last_name = last_name
+            if email != '':
+                user.email = email
+            db.session.commit()
+            flash("Profile Information Edited Successfully!", "success")
+            return redirect(url_for('profile'))
+        elif "password_submit" in request.form:
+            new_password = request.form.get("newpass")
+            old_password = request.form.get('oldpass')
+            if user and user.check_password(old_password):
+                print('true')
+                user.set_password(new_password)
+                db.session.commit()
+                flash("Password Successfully Changed!", 'success')
+                return redirect(url_for('profile'))
+            else:
+                flash('Incorrect Password!', 'danger')
+                return redirect(url_for('profile'))
 
 
 # edit / add / profile 
