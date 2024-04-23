@@ -158,7 +158,7 @@ def add_projects():
 @app.route("/add/tournaments")
 # @login_required
 def add_tournaments():
-    return render_template("add-events.html")=
+    return render_template("add-events.html")
 
 @app.route("/edit")
 # @login_required
