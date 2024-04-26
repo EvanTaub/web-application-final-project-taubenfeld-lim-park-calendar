@@ -1,5 +1,8 @@
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session
+from authlib.integrations.flask_client import OAuth
+import os
+
 
 
 from flask_sqlalchemy import SQLAlchemy
@@ -31,6 +34,7 @@ from extensions import db  # Adjust the import path as necessary
 
 app = Flask(__name__)
 app.secret_key ='soujgpoisefpowigmppwoigvhw0wefwefwogihj'
+oauth = OAuth(app)
 
 # Establish login
 login_manager = LoginManager(app)

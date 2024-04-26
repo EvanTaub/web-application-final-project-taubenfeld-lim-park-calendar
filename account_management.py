@@ -6,6 +6,13 @@ from classes import User
 
 from extensions import db  # Adjust the import path as necessary
 
+from authlib.integrations.flask_client import OAuth
+
+
+
+
+# def google_email_main():
+   
 
 
 def register_main():

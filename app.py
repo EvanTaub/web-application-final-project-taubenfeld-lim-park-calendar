@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-
+from authlib.integrations.flask_client import OAuth
+import os
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
@@ -32,6 +33,7 @@ from extensions import db, login_manager  # Adjust the import path as necessary
 
 
 app = Flask(__name__)
+oauth = OAuth(app)
 app.config['SECRET_KEY'] = 'soujgpoisefpowigmppwoigvhw0wefwefwogihj'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///calendar.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -47,20 +49,67 @@ with app.app_context():
     db.create_all()
 
 # Here you can register your blueprints or routes
+def generate_token():
+    return secrets.token_urlsafe(50)  
+
+
+
+@app.route('/google/')
+def google():
+    page = request.args.get('page')
+    print(page)
+    GOOGLE_CLIENT_ID = '867012396004-2orvos6k259l1v8gu8u6ntl9re438fl9.apps.googleusercontent.com'
+    GOOGLE_CLIENT_SECRET = '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'
+
+    CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
+    oauth.register(
+        name='google',
+        client_id=GOOGLE_CLIENT_ID,
+        client_secret=GOOGLE_CLIENT_SECRET,
+        server_metadata_url=CONF_URL,
+        client_kwargs={
+            'scope': 'openid email profile'
+        }
+    )
+
+    # Redirect to google_auth function
+    redirect_uri = url_for('google_auth', _external=True)
+    print(redirect_uri)
+    session['nonce'] = generate_token()
+    return oauth.google.authorize_redirect(redirect_uri, nonce = session['nonce'], page = page)
+    
+
+    
+
+@app.route('/google/auth/')
+def google_auth():
+    try:
+        token = oauth.google.authorize_access_token()
+        user = oauth.google.parse_id_token(token, nonce = session['nonce'])
+        page = request.args.get('page')
+        print(page)
+        print(" Google User ", user)
+        if page == 'register':
+            print('register')
+            return redirect(url_for('register'))
+        elif page == 'login':
+            return redirect(url_for('login'))
+        else:
+            print("well something went wrong sadge")
+            return redirect(url_for('index'))
+    except:
+        return redirect('index')
+
+
+# google redirect for login http://localhost:5000/google/auth
+# client id 867012396004-2orvos6k259l1v8gu8u6ntl9re438fl9.apps.googleusercontent.com
+# client secret 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
 
 
 
 
 
 
-
-
-
-
-
-
-# def generate_verification_token():
-#     return secrets.token_urlsafe(50)  # Adjust the token length as needed
 
 
 # # Send a Verification Email:
@@ -86,15 +135,16 @@ def test():
 def register():
     if request.method == "GET":
         return render_template('register.html')
-    if request.method == "POST":
-        register_item = register_main()
-        if isinstance(register_item,User):
-            db.session.add(register_item)
-            db.session.commit()
-        else:
-            flash(register_item[0],register_item[1])
-            return redirect(url_for('register'))
-        return redirect(url_for('index'))
+    # if request.method == "POST":
+    #     register_item = register_main()
+    #     if isinstance(register_item,User):
+    #         db.session.add(register_item)
+    #         db.session.commit()
+    #     else:
+    #         flash(register_item[0],register_item[1])
+    #         return redirect(url_for('register'))
+    #     return redirect(url_for('index'))
+
 
         
 
@@ -129,7 +179,7 @@ def logout():
 @app.route('/events')
 def event():
     if request.method == "GET":
-        return render_template('events.html')
+        return render_template('events copy.html')
     if request.method == "POST":
         if "add_event" in request.form:
             event_title = request.form.get('event_title')
@@ -212,6 +262,7 @@ def profile():
 
 
 # edit / add / profile 
+
 
 if __name__ == "__main__":
     app.secret_key = "super_secret_key"  # Change this to a random, secure key

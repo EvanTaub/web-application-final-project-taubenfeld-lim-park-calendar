@@ -33,7 +33,7 @@ class User(db.Model, UserMixin):
     phone_number = db.Column(db.String(10), nullable=False, default='')
     account_type = db.Column(db.String(255), nullable=False, default="Student")
     # Relationship for events joined by the user
-    events_created = db.relationship('Event', secondary=user_event_association, backref='events_joined', lazy='dynamic')
+    joined_events = db.relationship('Event', secondary=user_event_association, backref='events_joined', lazy='dynamic')
     
     # Relationship for events created by the user
     events_created = db.relationship('Event', backref='creator', lazy=True)
