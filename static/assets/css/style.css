@@ -2522,8 +2522,14 @@ div.event-list {
 
 /* EVENTS LIST CSS*/
 
+
 .row-events {
   margin-top: 30px;
+}
+
+.col-event {
+  padding-right: 40px;
+  margin-right: 50px;
 }
 
 .card-event {

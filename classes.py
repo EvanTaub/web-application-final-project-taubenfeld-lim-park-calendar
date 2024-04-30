@@ -26,7 +26,7 @@ class User(db.Model, UserMixin):
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
     email = db.Column(db.String(255), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=True)
     email_verification_token = db.Column(db.String(255))
     is_verified = db.Column(db.Boolean, default=False)
     mfa_enabled = db.Column(db.Boolean, default=False)

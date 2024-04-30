@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from authlib.integrations.flask_client import OAuth
 import os
-
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 import os, io
@@ -17,7 +16,7 @@ from flask_login import LoginManager, UserMixin
 from flask_login import login_user, current_user, logout_user, login_required
 import base64, io
 from PIL import Image
-
+from flask_paginate import Pagination
 
 import random
 # twilio test
@@ -44,6 +43,20 @@ login_manager.login_view = "login"
 login_manager.login_message = "Unauthorized Access. Please Login!"
 login_manager.login_message_category = 'danger'
 
+GOOGLE_CLIENT_ID = '867012396004-2orvos6k259l1v8gu8u6ntl9re438fl9.apps.googleusercontent.com'
+GOOGLE_CLIENT_SECRET = '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'
+
+CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
+oauth.register(
+    name='google',
+    client_id=GOOGLE_CLIENT_ID,
+    client_secret=GOOGLE_CLIENT_SECRET,
+    server_metadata_url=CONF_URL,
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
+)
+
 
 with app.app_context():
     db.create_all()
@@ -52,32 +65,43 @@ with app.app_context():
 def generate_token():
     return secrets.token_urlsafe(50)  
 
+####### PAGINATION EXAMPLE on back end!!!!!!!!! #######
+#  if request.method=='GET':
+#         per_page = 5
+#         page = request.args.get('page', 1, type=int)
+#         offset = (page-1) * per_page
+#         # items = get_items(offset)
+    
+#         pagination = Pagination(page=page, total=Book.query.count(), record_name='items',per_page=per_page)
+#         books = Book.query.paginate(page=page,per_page=per_page)
+#         return render_template("inventory.html", books = books, pagination=pagination)
 
 
 @app.route('/google/')
 def google():
     page = request.args.get('page')
-    print(page)
-    GOOGLE_CLIENT_ID = '867012396004-2orvos6k259l1v8gu8u6ntl9re438fl9.apps.googleusercontent.com'
-    GOOGLE_CLIENT_SECRET = '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'
+    session['nonce'] = generate_token()
 
-    CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
-    oauth.register(
-        name='google',
-        client_id=GOOGLE_CLIENT_ID,
-        client_secret=GOOGLE_CLIENT_SECRET,
-        server_metadata_url=CONF_URL,
-        client_kwargs={
-            'scope': 'openid email profile'
-        }
-    )
+    print(page)
+    # GOOGLE_CLIENT_ID = '867012396004-2orvos6k259l1v8gu8u6ntl9re438fl9.apps.googleusercontent.com'
+    # GOOGLE_CLIENT_SECRET = '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'
+
+    # CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
+    # oauth.register(
+    #     name='google',
+    #     client_id=GOOGLE_CLIENT_ID,
+    #     client_secret=GOOGLE_CLIENT_SECRET,
+    #     server_metadata_url=CONF_URL,
+    #     client_kwargs={
+    #         'scope': 'openid email profile'
+    #     }
+    # )
 
     # Redirect to google_auth function
     redirect_uri = url_for('google_auth', _external=True)
     print(redirect_uri)
-    session['nonce'] = generate_token()
-    return oauth.google.authorize_redirect(redirect_uri, nonce = session['nonce'], page = page)
     
+    return oauth.google.authorize_redirect(redirect_uri, nonce=session['nonce'])
 
     
 
@@ -85,20 +109,51 @@ def google():
 def google_auth():
     try:
         token = oauth.google.authorize_access_token()
-        user = oauth.google.parse_id_token(token, nonce = session['nonce'])
+        user_info = oauth.google.parse_id_token(token, nonce=session['nonce'])
+
+        # Retrieve the user's information
+        email = user_info.get('email')
+        first_name = user_info.get('given_name', '')
+        last_name = user_info.get('family_name', '')
+
+        # Check if the user already exists
+        existing_user = User.query.filter_by(email=email).first()
+
+        if existing_user:
+            login_user(existing_user)  # Log them in directly
+            flash('Logged in successfully through Google!', 'success')
+        else:
+            # Create a new user if not found
+            new_user = User(
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                password_hash='sample_google_password',  # No password set for Google logins
+                phone_number='',  # Empty phone number to match model definition
+                account_type="Student"  # Default to Student
+            )
+
+            # Save the new user to the database
+            db.session.add(new_user)
+            db.session.commit()
+
+            login_user(new_user)  # Log the new user in
+            flash('Registered and logged in successfully through Google!', 'success')
+
+        # Determine the appropriate page to redirect to
         page = request.args.get('page')
-        print(page)
-        print(" Google User ", user)
         if page == 'register':
-            print('register')
             return redirect(url_for('register'))
         elif page == 'login':
             return redirect(url_for('login'))
         else:
-            print("well something went wrong sadge")
             return redirect(url_for('index'))
-    except:
-        return redirect('index')
+
+    except Exception as e:
+        print(f"Error: {e}")
+        flash('An error occurred during authentication.', 'danger')
+        return redirect(url_for('index'))
+
 
 
 # google redirect for login http://localhost:5000/google/auth
@@ -128,7 +183,7 @@ def index():
 #temporary route
 @app.route("/test")
 def test():
-    return render_template("event_determination.html")
+    return render_template("test.html")
 
 
 @app.route("/register", methods = ["GET","POST"])
@@ -166,8 +221,14 @@ def login():
         
 
 @login_manager.user_loader
+@login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    try:
+        return User.query.get(int(user_id))  # Ensure this conversion happens only on valid data
+    except (TypeError, ValueError):
+        return None  # Return None gracefully for invalid or missing data
+
+
 
 @app.route('/logout')
 @login_required
@@ -179,7 +240,7 @@ def logout():
 @app.route('/events')
 def event():
     if request.method == "GET":
-        return render_template('events copy.html')
+        return render_template('events.html')
     if request.method == "POST":
         if "add_event" in request.form:
             event_title = request.form.get('event_title')
