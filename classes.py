@@ -32,11 +32,9 @@ class User(db.Model, UserMixin):
     mfa_enabled = db.Column(db.Boolean, default=False)
     phone_number = db.Column(db.String(10), nullable=False, default='')
     account_type = db.Column(db.String(255), nullable=False, default="Student")
-    # Relationship for events joined by the user
-    joined_events = db.relationship('Event', secondary=user_event_association, backref='events_joined', lazy='dynamic')
     
-    # Relationship for events created by the user
-    events_created = db.relationship('Event', backref='creator', lazy=True)
+    joined_events = db.relationship('Event', secondary=user_event_association, backref='attendees', lazy='dynamic')
+    created_events = db.relationship('Event', backref='creator', lazy='dynamic')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -45,7 +43,27 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
-        return f"ID: {self.id}\nFirst Name: {self.first_name}\nLast Name: {self.last_name}\nEmail: {self.email}\nAccount Type: {self.account_type} "
+        return f"ID: {self.id}\nFirst Name: {self.first_name}\nLast Name: {self.last_name}\nEmail: {self.email}\nAccount Type: {self.account_type}"
+
+    def create_event(self, **kwargs):
+        if not isinstance(self, Teacher):
+            raise PermissionError("Only teachers and admins can create events.")
+        pass
+        # event = Event(**kwargs, creator=self)
+        # db.session.add(event)
+        # db.session.commit()
+        return # event
+
+class Teacher(User):
+    __tablename__ = 'teacher'
+    id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    
+    # Relationship for events created by the teacher
+    events_created = db.relationship('Event', backref=db.backref('creator_teacher', lazy=True))
+
+class Admin(Teacher):
+    __tablename__ = 'admin'
+    id = db.Column(db.Integer, db.ForeignKey('teacher.id'), primary_key=True)
 
 class Event(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -64,5 +82,4 @@ class ProjectWednesday(Event):
 class Tournaments(Event):
     id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
     cost = db.Column(db.Float, default=1, nullable=False)
-
 

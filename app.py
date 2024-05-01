@@ -16,7 +16,7 @@ from flask_login import LoginManager, UserMixin
 from flask_login import login_user, current_user, logout_user, login_required
 import base64, io
 from PIL import Image
-from flask_paginate import Pagination
+# from flask_paginate import Pagination
 
 import random
 # twilio test
@@ -121,6 +121,7 @@ def google_auth():
 
         if existing_user:
             login_user(existing_user)  # Log them in directly
+            session['id'] = existing_user.id
             flash('Logged in successfully through Google!', 'success')
         else:
             # Create a new user if not found
@@ -136,6 +137,8 @@ def google_auth():
             # Save the new user to the database
             db.session.add(new_user)
             db.session.commit()
+
+            session['id'] = new_user.id
 
             login_user(new_user)  # Log the new user in
             flash('Registered and logged in successfully through Google!', 'success')
