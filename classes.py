@@ -65,6 +65,10 @@ class Admin(Teacher):
     __tablename__ = 'admin'
     id = db.Column(db.Integer, db.ForeignKey('teacher.id'), primary_key=True)
 
+class SuperAdmin(Admin):
+    __tablename__ = 's_admin'
+    id = db.Column(db.Integer,db.ForeignKey('admin.id'), primary_key=True)
+
 class Event(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

@@ -26,7 +26,7 @@ from twilio.rest import Client
 
 from database import login_manager
 from account_management import login_management, logout_main, register_main, load_user_main
-from classes import User
+from classes import User, SuperAdmin
 
 from extensions import db, login_manager  # Adjust the import path as necessary
 
@@ -156,6 +156,8 @@ def google_auth():
         print(f"Error: {e}")
         flash('An error occurred during authentication.', 'danger')
         return redirect(url_for('index'))
+
+
 
 
 
@@ -326,6 +328,88 @@ def profile():
 
 
 # edit / add / profile 
+
+# Import necessary modules
+@app.route('/promote', methods=['GET', 'POST'])
+@login_required
+def promote():
+    user = User.query.get(int(session['id']))  # Retrieve the current user by ID
+
+    if user.account_type != 'SuperAdmin':
+        flash('Unauthorized Access!', 'danger')
+        return redirect(url_for('index'))
+    # if not isinstance(user, SuperAdmin):
+    #     flash('Unauthorized Access!', 'danger')
+    #     return redirect(url_for('index'))
+
+    users = User.query.all()  # Retrieve all users from the database
+
+    if request.method == 'GET':
+        return render_template('promote.html', users=users)  # Pass users to the template
+
+    if request.method == 'POST':
+        user_id = request.form.get('user_id')
+        new_role = request.form.get('new_role')
+
+        if user_id and new_role:
+            user_to_promote = User.query.get(int(user_id))
+
+            if user_to_promote:
+                user_to_promote.account_type = new_role  # Assign the new role
+                db.session.commit()  # Save changes
+
+                flash(f"User {user_to_promote.email} promoted to {new_role}", 'success')
+            else:
+                flash("User not found", 'danger')
+        else:
+            flash("Invalid promotion request", 'danger')
+
+        return redirect(url_for('promote'))
+
+
+
+def promote_self_to_superadmin():
+    email = "your_email@example.com"  # Replace with your email
+    user = User.query.filter_by(email=email).first()  # Retrieve the user by email
+
+    if user:
+        # Promote the user through class inheritance
+        if not isinstance(user, SuperAdmin):
+            user_account_type = user.account_type
+
+            if user_account_type == "Student":
+                # Reassign user to Teacher first
+                user = Teacher(
+                    id=user.id,
+                    first_name=user.first_name,
+                    last_name=user.last_name,
+                    email=user.email,
+                    password_hash=user.password_hash,
+                    account_type="Teacher"
+                )
+                db.session.commit()  # Save changes
+
+            if user_account_type in ["Teacher", "Admin"]:
+                # Reassign user to SuperAdmin
+                user = SuperAdmin(
+                    id=user.id,
+                    first_name=user.first_name,
+                    last_name=user.last_name,
+                    email=user.email,
+                    password_hash=user.password_hash,
+                    account_type="SuperAdmin"
+                )
+                db.session.commit()  # Save changes
+
+        print(f"User {email} promoted to SuperAdmin.")
+    else:
+        print(f"User with email {email} not found.")
+
+
+       
+
+
+
 
 
 if __name__ == "__main__":
