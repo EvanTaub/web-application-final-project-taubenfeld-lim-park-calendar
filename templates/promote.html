@@ -13,6 +13,7 @@
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Email</th>
+                    <th>Current Role</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -22,12 +23,13 @@
                         <td>{{ user.first_name }}</td>
                         <td>{{ user.last_name }}</td>
                         <td>{{ user.email }}</td>
+                        <td>{{ user.account_type }}</td>
                         <td>
                             <form method="POST" action="{{ url_for('promote') }}">
                                 <select name="new_role" class="form-control mb-1">
-                                    <option value="Teacher">Teacher</option>
-                                    <option value="Admin">Admin</option>
-                                    <option value="SuperAdmin">SuperAdmin</option>
+                                    <option value="Teacher" {% if user.account_type == 'Teacher' %} selected {% endif %}>Teacher</option>
+                                    <option value="Admin" {% if user.account_type == 'Admin' %} selected {% endif %}>Admin</option>
+                                    <option value="SuperAdmin" {% if user.account_type == 'SuperAdmin' %} selected {% endif %}>SuperAdmin</option>
                                 </select>
 
                                 <input type="hidden" name="user_id" value="{{ user.id }}">

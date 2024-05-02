@@ -33,7 +33,7 @@ class User(db.Model, UserMixin):
     phone_number = db.Column(db.String(10), nullable=False, default='')
     account_type = db.Column(db.String(255), nullable=False, default="Student")
     
-    joined_events = db.relationship('Event', secondary=user_event_association, backref='attendees', lazy='dynamic')
+    joined_events = db.relationship('Event', secondary=user_event_association, backref='attendees', lazy='dynamic', overlaps="attendees,joined_events")
     created_events = db.relationship('Event', backref='creator', lazy='dynamic')
 
     def set_password(self, password):
@@ -43,7 +43,7 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
-        return f"ID: {self.id}\nFirst Name: {self.first_name}\nLast Name: {self.last_name}\nEmail: {self.email}\nAccount Type: {self.account_type}"
+        return f"ID: {self.id}\nFirst Name: {self.first_name}\nLast Name: {self.last_name}\nEmail: {self.email}\n Account Type {self.__class__.__name__}"
 
     def create_event(self, **kwargs):
         if not isinstance(self, Teacher):
@@ -59,7 +59,7 @@ class Teacher(User):
     id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     
     # Relationship for events created by the teacher
-    events_created = db.relationship('Event', backref=db.backref('creator_teacher', lazy=True))
+    events_created = db.relationship('Event', backref=db.backref('creator_teacher', lazy=True),overlaps="created_events,creator")
 
 class Admin(Teacher):
     __tablename__ = 'admin'
@@ -76,7 +76,7 @@ class Event(db.Model, UserMixin):
     description = db.Column(db.String(350), nullable=False, default='null')
     image = db.Column(db.LargeBinary)
     student_limit = db.Column(db.Integer, nullable = False)
-    participants = db.relationship('User', secondary=user_event_association, backref=db.backref('events_joined', lazy='dynamic'))
+    participants = db.relationship('User', secondary=user_event_association, backref=db.backref('events_joined', lazy='dynamic'),overlaps="attendees,joined_events")
 
 
 class ProjectWednesday(Event):

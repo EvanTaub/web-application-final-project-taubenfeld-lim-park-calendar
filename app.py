@@ -58,8 +58,16 @@ oauth.register(
 )
 
 
+
 with app.app_context():
     db.create_all()
+
+
+# with app.app_context():
+#     user = SuperAdmin(id = 1, email='redemanjt@gmail.com', first_name='Evan', last_name='Taubenfeld')
+#     print(user)
+#     db.session.add(user)
+#     db.session.commit()
 
 # Here you can register your blueprints or routes
 def generate_token():
@@ -183,6 +191,9 @@ def google_auth():
 
 @app.route("/")
 def index():
+    user = SuperAdmin.query.get('redemanjt@gmail.com')
+    print(user)
+    print("Test")
     return render_template("index.html")
 
 #temporary route
@@ -333,16 +344,17 @@ def profile():
 @app.route('/promote', methods=['GET', 'POST'])
 @login_required
 def promote():
-    user = User.query.get(int(session['id']))  # Retrieve the current user by ID
+    current_user_obj = User.query.get(int(session['id']))  # Retrieve the current user by ID
 
-    if user.account_type != 'SuperAdmin':
+    # Access control based on account type
+    if current_user_obj.account_type == 'Admin':
+        # Retrieve all users except SuperAdmins and other Admins
+        users = User.query.filter(User.account_type != 'SuperAdmin', User.account_type != 'Admin').all()
+    elif current_user_obj.account_type == 'SuperAdmin':
+        users = User.query.all()  # SuperAdmins can see all users
+    else:
         flash('Unauthorized Access!', 'danger')
         return redirect(url_for('index'))
-    # if not isinstance(user, SuperAdmin):
-    #     flash('Unauthorized Access!', 'danger')
-    #     return redirect(url_for('index'))
-
-    users = User.query.all()  # Retrieve all users from the database
 
     if request.method == 'GET':
         return render_template('promote.html', users=users)  # Pass users to the template
@@ -355,16 +367,23 @@ def promote():
             user_to_promote = User.query.get(int(user_id))
 
             if user_to_promote:
-                user_to_promote.account_type = new_role  # Assign the new role
-                db.session.commit()  # Save changes
+                # Check if the promotion is allowed
+                if (current_user_obj.account_type == 'Admin' and user_to_promote.account_type in ['Admin', 'SuperAdmin']):
+                    flash("Admins can't modify Admins or SuperAdmins.", 'danger')
+                elif (current_user_obj.account_type == 'SuperAdmin' and user_to_promote.account_type == 'SuperAdmin'):
+                    flash("SuperAdmins can't modify SuperAdmins.", 'danger')
+                else:
+                    user_to_promote.account_type = new_role  # Assign the new role
+                    db.session.commit()  # Save changes
 
-                flash(f"User {user_to_promote.email} promoted to {new_role}", 'success')
+                    flash(f"User {user_to_promote.email} promoted to {new_role}", 'success')
             else:
                 flash("User not found", 'danger')
         else:
             flash("Invalid promotion request", 'danger')
 
         return redirect(url_for('promote'))
+
 
 
 
