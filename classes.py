@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import JSON
+import json
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import Column, Integer, String, ForeignKey, LargeBinary, Boolean, Float, Table
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -15,11 +17,21 @@ from extensions import db
 # db = SQLAlchemy(app)
 
 
-user_event_association = db.Table(
-    'user_event_association',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('event_id', db.Integer, db.ForeignKey('event.id'))
-)
+# flag_modified(user_instance, 'modified parameter') when modifying json file; tell database json is modified
+def load_default_events():
+    with open('static/assets/jsons/default_events.json', 'r') as file:
+        default_events = json.load(file)
+    return default_events
+
+def load_create_default():
+    with open('static/assets/jsons/created_events.json', 'r') as file:
+        default_events = json.load(file)
+    return default_events
+
+def load_joined_users():
+    with open('static/assets/jsons/created_events.json', 'r') as file:
+        default_events = json.load(file)
+    return default_events
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -32,9 +44,9 @@ class User(db.Model, UserMixin):
     mfa_enabled = db.Column(db.Boolean, default=False)
     phone_number = db.Column(db.String(10), nullable=False, default='')
     account_type = db.Column(db.String(255), nullable=False, default="Student")
+    joined_events = db.Column(JSON, default = load_default_events)
     
-    joined_events = db.relationship('Event', secondary=user_event_association, backref='attendees', lazy='dynamic', overlaps="attendees,joined_events")
-    created_events = db.relationship('Event', backref='creator', lazy='dynamic')
+
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -57,9 +69,7 @@ class User(db.Model, UserMixin):
 class Teacher(User):
     __tablename__ = 'teacher'
     id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-    
-    # Relationship for events created by the teacher
-    events_created = db.relationship('Event', backref=db.backref('creator_teacher', lazy=True),overlaps="created_events,creator")
+    events_created = db.Column(JSON, default = load_create_default)
 
 class Admin(Teacher):
     __tablename__ = 'admin'
@@ -76,7 +86,7 @@ class Event(db.Model, UserMixin):
     description = db.Column(db.String(350), nullable=False, default='null')
     image = db.Column(db.LargeBinary)
     student_limit = db.Column(db.Integer, nullable = False)
-    participants = db.relationship('User', secondary=user_event_association, backref=db.backref('events_joined', lazy='dynamic'),overlaps="attendees,joined_events")
+    participants = db.Column(JSON, load_joined_users)
 
 
 class ProjectWednesday(Event):

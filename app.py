@@ -345,16 +345,16 @@ def profile():
 @login_required
 def promote():
     current_user_obj = User.query.get(int(session['id']))  # Retrieve the current user by ID
-
+    users = User.query.all() 
     # Access control based on account type
-    if current_user_obj.account_type == 'Admin':
-        # Retrieve all users except SuperAdmins and other Admins
-        users = User.query.filter(User.account_type != 'SuperAdmin', User.account_type != 'Admin').all()
-    elif current_user_obj.account_type == 'SuperAdmin':
-        users = User.query.all()  # SuperAdmins can see all users
-    else:
-        flash('Unauthorized Access!', 'danger')
-        return redirect(url_for('index'))
+    # if current_user_obj.account_type == 'Admin':
+    #     # Retrieve all users except SuperAdmins and other Admins
+    #     users = User.query.filter(User.account_type != 'SuperAdmin', User.account_type != 'Admin').all()
+    # elif current_user_obj.account_type == 'SuperAdmin':
+    #     users = User.query.all()  # SuperAdmins can see all users
+    # else:
+    #     flash('Unauthorized Access!', 'danger')
+    #     return redirect(url_for('index'))
 
     if request.method == 'GET':
         return render_template('promote.html', users=users)  # Pass users to the template
