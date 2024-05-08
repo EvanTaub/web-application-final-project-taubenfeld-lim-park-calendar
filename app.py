@@ -16,7 +16,7 @@ from flask_login import LoginManager, UserMixin
 from flask_login import login_user, current_user, logout_user, login_required
 import base64, io
 from PIL import Image
-# from flask_paginate import Pagination
+from flask_paginate import Pagination
 
 import random
 # twilio test
@@ -26,7 +26,7 @@ from twilio.rest import Client
 
 from database import login_manager
 from account_management import login_management, logout_main, register_main, load_user_main
-from classes import User, SuperAdmin
+from classes import User, SuperAdmin, Admin, Teacher, ProjectWednesday, Event, Tournaments
 
 from extensions import db, login_manager  # Adjust the import path as necessary
 
@@ -79,7 +79,7 @@ def generate_token():
 #         page = request.args.get('page', 1, type=int)
 #         offset = (page-1) * per_page
 #         # items = get_items(offset)
-    
+          
 #         pagination = Pagination(page=page, total=Book.query.count(), record_name='items',per_page=per_page)
 #         books = Book.query.paginate(page=page,per_page=per_page)
 #         return render_template("inventory.html", books = books, pagination=pagination)
@@ -256,6 +256,9 @@ def logout():
 @app.route('/events')
 def event():
     if request.method == "GET":
+        # events_per_page = 6
+        # page = request.args.get('page', 1, type=int)
+        # offset = (page - 1) * events_per_page
         return render_template('events.html')
     if request.method == "POST":
         if "add_event" in request.form:
@@ -267,6 +270,16 @@ def event():
         if "edit_event" in request.form:
             pass
             return render_template('events.html')
+
+#  if request.method=='GET':
+#         per_page = 5
+#         page = request.args.get('page', 1, type=int)
+#         offset = (page-1) * per_page
+#         # items = get_items(offset)
+          
+#         pagination = Pagination(page=page, total=Book.query.count(), record_name='items',per_page=per_page)
+#         books = Book.query.paginate(page=page,per_page=per_page)
+#         return render_template("inventory.html", books = books, pagination=pagination)
 
 @app.route("/add")
 # @login_required
@@ -286,7 +299,7 @@ def add_projects():
 @app.route("/add/tournaments")
 # @login_required
 def add_tournaments():
-    return render_template("add-events.html")
+    return render_template("add-events-tournaments.html")
 
 @app.route("/edit")
 # @login_required

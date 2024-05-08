@@ -86,7 +86,7 @@ class Event(db.Model, UserMixin):
     description = db.Column(db.String(350), nullable=False, default='null')
     image = db.Column(db.LargeBinary)
     student_limit = db.Column(db.Integer, nullable = False)
-    participants = db.Column(JSON, load_joined_users)
+    participants = db.Column(JSON, default = load_joined_users)
 
 
 class ProjectWednesday(Event):
