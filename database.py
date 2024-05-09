@@ -2,7 +2,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from authlib.integrations.flask_client import OAuth
 import os
-
+import csv
 
 
 from flask_sqlalchemy import SQLAlchemy
@@ -38,6 +38,9 @@ oauth = OAuth(app)
 
 # Establish login
 login_manager = LoginManager(app)
+
+
+row in file_read:
 
 
 

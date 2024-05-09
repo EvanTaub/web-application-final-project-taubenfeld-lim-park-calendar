@@ -17,6 +17,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 import base64, io
 from PIL import Image
 from flask_paginate import Pagination
+from datetime import datetime
 
 import random
 # twilio test
@@ -289,7 +290,7 @@ def add():
 @app.route("/add/performances")
 # @login_required
 def add_performances():
-    return render_template("add-events.html")
+    return render_template("add-events-performance.html")
 
 @app.route("/add/project_wednesdays")
 # @login_required
@@ -437,8 +438,20 @@ def promote_self_to_superadmin():
     else:
         print(f"User with email {email} not found.")
 
-
-       
+# Process CSV file
+def upload_csv(file,creator_id):
+    with open(file,'r') as File:
+        file_read = csv.reader(File)
+        headers = next(file_read)
+        for row in file_read:
+            ProjectWednesday(
+                name = row[0],
+                # Checks if there is more than one teacher for the class
+                creator_id = creator_id,
+                teachers = row[1],
+                
+            )
+                 
 
 
 
