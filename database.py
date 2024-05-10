@@ -40,7 +40,7 @@ oauth = OAuth(app)
 login_manager = LoginManager(app)
 
 
-row in file_read:
+
 
 
 

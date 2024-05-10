@@ -84,7 +84,7 @@ class Event(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(255), nullable=False, default='null')
-    description = db.Column(db.String(3000), nullable=False, default='null')
+    description = db.Column(db.String(2500), nullable=False, default='null')
     image = db.Column(db.LargeBinary)
     student_limit = db.Column(db.Integer, nullable = False)
     participants = db.Column(JSON, default = load_joined_users)
@@ -93,18 +93,20 @@ class Event(db.Model, UserMixin):
 class ProjectWednesday(Event):
     id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
     cycle_number = db.Column(db.Integer, default=1, nullable=False)
+    title = db.Column(db.String(255), nullable=False, default='null')
     cost = db.Column(db.String(50), default = '0', nullable = True)
     teachers = db.Column(db.String(100), default = '', nullable = False)
     student_assistant = db.Column(db.String(50), default = '', nullable = True)
+    special_note = db.Column(db.String(50), default = '', nullable = True)
 
 class Tournaments(Event):
     id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
     cost_spectator = db.Column(db.Float, default=1, nullable=False)
     cost_competitor = db.Column(db.Float, default=1, nullable=False)
-    date_of_tournament = db.Column(db.Datetime, default=datetime.utcnow, nullable=False)
+    date_of_tournament = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 class Performances(Event):
     id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
     cost_audience = db.Column(db.Float, default=1, nullable=False)
-    date_of_performance = db.Column(db.Datetime, default=datetime.utcnow, nullable=False)
+    date_of_performance = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 

@@ -170,6 +170,7 @@ def google_auth():
 
 
 
+
 # google redirect for login http://localhost:5000/google/auth
 # client id 867012396004-2orvos6k259l1v8gu8u6ntl9re438fl9.apps.googleusercontent.com
 # client secret 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
@@ -254,7 +255,7 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/events')
+@app.route('/events', methods = ["GET", "POST"])
 def event():
     if request.method == "GET":
         # events_per_page = 6
@@ -268,9 +269,19 @@ def event():
             event_description = request.form.get('event_description')
             
             return render_template('events.html')
+        if "cycle_submit" in request.form:
+            csv_file = request.files["csv_file"]
+            csv_data = parse_csv_data(csv_file)
+            upload_csv_wednesday(csv_data,current_user.id)
+            flash('Events Successfully Added!', 'success')
+            return redirect(url_for('event'))
         if "edit_event" in request.form:
             pass
             return render_template('events.html')
+
+
+        flash('Invalid event submission.', 'error')
+        return redirect(url_for('event'))
 
 #  if request.method=='GET':
 #         per_page = 5
@@ -292,11 +303,40 @@ def add():
 def add_performances():
     return render_template("add-events-performance.html")
 
-@app.route("/add/project_wednesdays")
+@app.route("/add/project_wednesdays", methods =['GET', 'POST'])
 # @login_required
 def add_projects():
-    return render_template("add-events.html")
+        # Checks if the csv form is submitted
+    
+    return render_template("add-events-pw.html")
 
+def parse_csv_data(csv_file):
+    text_data = csv_file.read().decode("utf-8")
+    reader = csv.reader(io.StringIO(text_data))
+    headers = next(reader)
+    data = [row for row in reader]
+    return data
+
+def upload_csv_wednesday(csv_data, creator_id):
+    for row in csv_data:
+            try:
+                event = ProjectWednesday(
+                    title = row[0],
+                    creator_id = creator_id,
+                    teachers = row[1],
+                    student_assistant = row[2],
+                    description = row[3],
+                    cost = row[4],
+                    cycle_number = 2,
+                    student_limit = 20,
+                    special_note = row[5]
+                    )
+                print(event)
+                db.session.add(event)
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+        
 @app.route("/add/tournaments")
 # @login_required
 def add_tournaments():
@@ -439,19 +479,12 @@ def promote_self_to_superadmin():
         print(f"User with email {email} not found.")
 
 # Process CSV file
-def upload_csv(file,creator_id):
-    with open(file,'r') as File:
-        file_read = csv.reader(File)
-        headers = next(file_read)
-        for row in file_read:
-            ProjectWednesday(
-                name = row[0],
-                # Checks if there is more than one teacher for the class
-                creator_id = creator_id,
-                teachers = row[1],
-                
-            )
+        
+
+
+
                  
+
 
 
 
