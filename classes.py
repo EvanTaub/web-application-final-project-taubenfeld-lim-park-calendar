@@ -84,7 +84,7 @@ class Event(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(255), nullable=False, default='null')
-    description = db.Column(db.String(2500), nullable=False, default='null')
+    description = db.Column(db.Text, nullable=False, default='null')
     image = db.Column(db.LargeBinary)
     student_limit = db.Column(db.Integer, nullable = False)
     participants = db.Column(JSON, default = load_joined_users)
@@ -98,6 +98,7 @@ class ProjectWednesday(Event):
     teachers = db.Column(db.String(100), default = '', nullable = False)
     student_assistant = db.Column(db.String(50), default = '', nullable = True)
     special_note = db.Column(db.String(50), default = '', nullable = True)
+    
 
 class Tournaments(Event):
     id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
@@ -105,8 +106,57 @@ class Tournaments(Event):
     cost_competitor = db.Column(db.Float, default=1, nullable=False)
     date_of_tournament = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+
 class Performances(Event):
     id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
     cost_audience = db.Column(db.Float, default=1, nullable=False)
     date_of_performance = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+
+
+def parse_csv_data(csv_file):
+    text_data = csv_file.read().decode("utf-8")
+    reader = csv.reader(io.StringIO(text_data))
+    headers = next(reader)
+    data = [row for row in reader]
+    return data
+
+def upload_csv_tournaments(csv_data, creator_id):
+    for row in csv_data:
+        try:
+            event = Tournaments(
+                name = row[0],
+                description = row[1],
+                student_limit = row[2],
+                creator_id = creator_id,
+                cost_spectator = row[3],
+                cost_competitor = row[4],
+                date_of_tournament = row[5], #will need special processing to convert it for database
+            )
+            db.session.add(event)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+        
+
+def upload_csv_wednesday(csv_data, creator_id):
+    for row in csv_data:
+            print(row[3])
+            try:
+                event = ProjectWednesday(
+                    title = row[0],
+                    creator_id = creator_id,
+                    teachers = row[1],
+                    student_assistant = row[2],
+                    description = row[3][:2500],
+                    cost = row[4],
+                    cycle_number = 2,
+                    student_limit = 20,
+                    special_note = row[5]
+                    )
+                print(event)
+                db.session.add(event)
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+        
