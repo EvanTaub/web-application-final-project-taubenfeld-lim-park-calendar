@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 import os, io
 from werkzeug.utils import secure_filename
 import csv
-from sqlalchemy import desc, asc
+from sqlalchemy import desc, asc, not_
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
@@ -27,7 +27,7 @@ from twilio.rest import Client
 
 from database import login_manager
 from account_management import login_management, logout_main, register_main, load_user_main
-from classes import User, SuperAdmin, Admin, Teacher, ProjectWednesday, Event, Tournaments, parse_csv_data, upload_csv_tournaments, upload_csv_wednesday
+from classes import User, SuperAdmin, Admin, Teacher, ProjectWednesday, Event, Tournaments,Performances, parse_csv_data, upload_csv_tournaments, upload_csv_wednesday, join_project_wednesday
 
 from extensions import db, login_manager  # Adjust the import path as necessary
 
@@ -193,15 +193,14 @@ def google_auth():
 
 @app.route("/")
 def index():
-    user = SuperAdmin.query.get('redemanjt@gmail.com')
-    print(user)
-    print("Test")
     return render_template("index.html")
 
 #temporary route
 @app.route("/test")
 def test():
     return render_template("test.html")
+
+
 
 
 @app.route("/register", methods = ["GET","POST"])
@@ -258,10 +257,16 @@ def logout():
 @app.route('/events', methods = ["GET", "POST"])
 def event():
     if request.method == "GET":
+        events = Event.query.all() #filter(not_(ProjectWednesday.cycle_number)).all()
+        num_events = len(events)
+        if num_events == 0:
+            flash('There are no events at this time.', 'warning')
+            return render_template('index.html')
+        
         # events_per_page = 6
         # page = request.args.get('page', 1, type=int)
         # offset = (page - 1) * events_per_page
-        return render_template('events.html')
+        return render_template('events.html', events=events, num_events=num_events)
     if request.method == "POST":
         if "add_event" in request.form:
             event_title = request.form.get('event_title')
@@ -287,9 +292,27 @@ def event():
             pass
             return render_template('events.html')
 
-
         flash('Invalid event submission.', 'error')
         return redirect(url_for('event'))
+
+@app.route('/events/project_wednesday', methods=['GET', 'POST'])
+def display_pw():
+    if 'event_id' in request.args:
+        event_id = request.args.get('event_id')
+        project_wednesday = ProjectWednesday.query.get(event_id)
+
+        if request.method == "POST":
+            if 'join_button' in request.form:
+                if 'id' in session:
+                    join_project_wednesday(current_user.id, project_wednesday.id)
+                    flash("You have successfully joined the project!", "success")
+                else:
+                    flash("You must be logged in to make this action!", "danger")
+
+        return render_template('view_pw.html', event=project_wednesday)
+
+    events = ProjectWednesday.query.all()
+    return render_template('project_wednesdays.html', events=events)
 
 #  if request.method=='GET':
 #         per_page = 5
@@ -306,17 +329,92 @@ def event():
 def add():
     return render_template("event_determination.html")
 
-@app.route("/add/performances")
+@app.route("/add/performances", methods=['GET', 'POST'])
 # @login_required
 def add_performances():
+    if request.method == "POST":
+        name = request.form['event_title']
+        description = request.form['event_description']
+        date = request.form['date_of_torunament']
+        student_limit = request.form['student_limit']
+        if 'event_pic' not in request.files:
+            event_pic = ''
+        else:
+            event_pic = request.files['event_pic'] 
+        cost_audience = request.form['cost_audience']
+
+        new_performance = Performances(
+            creator_id = current_user.id,
+            name = name,
+            description = description,
+            student_limit = student_limit,
+            image = event_pic,
+            date_of_tournament = date,
+            cost_audience = cost_audience,
+        )
+        
+        db.session.add(new_performance)
+        db.session.commit()
+        flash('Performance added successfully!', 'success')
+        return redirect(url_for('add_performances'))
     return render_template("add-events-performance.html")
 
-@app.route("/add/project_wednesdays", methods =['GET', 'POST'])
-# @login_required
+@app.route("/add/project_wednesdays", methods=['GET', 'POST'])
+@login_required
 def add_projects():
-        # Checks if the csv form is submitted
-    
+    if request.method == "POST":
+        if 'event_submit' in request.form:
+            name = request.form['name']
+            description = request.form['project_description']
+            student_limit = request.form['student_limit']
+            teachers = request.form['teachers']
+            student_assistant = request.form['student_assistant']
+            special_note = request.form['special_note']
+            cycle_number = request.form['cycle']
+
+            new_project = ProjectWednesday(
+                creator_id=current_user.id,
+                name=name,
+                description=description,
+                student_limit=student_limit,
+                teachers=teachers,
+                student_assistant=student_assistant,
+                special_note=special_note,
+                cycle_number=cycle_number
+            )
+
+            db.session.add(new_project)
+            db.session.commit()
+            flash('Project added successfully!', 'success')
+            return redirect(url_for('add_projects'))
+        
+        elif 'cycle_submit' in request.form:
+            event_description = request.form['event_description']
+            cycle_number = request.form['cycle']
+            csv_file = request.files['csv_file']
+            
+            csv_data = csv_file.read().decode('utf-8').splitlines()
+            csv_reader = csv.reader(csv_data)
+            for row in csv_reader:
+                new_project = ProjectWednesday(
+                    creator_id=current_user.id,
+                    name=row[0],
+                    description=row[1],
+                    student_limit=row[2],
+                    teachers=row[3],
+                    student_assistant=row[4],
+                    special_note=row[5],
+                    cycle_number=cycle_number
+                )
+                db.session.add(new_project)
+
+            db.session.commit()
+            flash('Project cycle uploaded successfully!', 'success')
+            return redirect(url_for('add_projects'))
+
     return render_template("add-events-pw.html")
+
+
 
 
 @app.route("/add/tournaments")
