@@ -122,7 +122,7 @@
 
 <div class="container-fluid" style="margin-top: 80px; justify-content:center">
     <div class="event-cards">
-
+      
     <div class="row row-events">
       <div class="col"></div>
       <div class="col">
@@ -130,7 +130,7 @@
               <div class="card-img-top event-img" style="background-image: url('static/assets/img/bt logo.png');  background-size: cover; background-position: center;"></div>
               <!-- <img class='event-img img-fluid' src="static/assets/img/bt logo.png" alt="IMG">  -->
               <div class="card-content">
-                  <h1 class="event-title"> Project Wednesdays</h1>
+                  <h1 class="event-title"><a href="/events/project_wednesday"> Project Wednesdays</a></h1>
                   <p class="event-desc"> 
                       Project Wednesdays are a perfect opportunity for students to spend time exploring other interests outside of class. Sign up for your Project Wednesday here!
                   </p>
@@ -151,71 +151,39 @@
           </div>
         </div>
         <div class="col"></div>
-    
-      </div>
+    </div>
 
-      <div class="row row-events">
-        <div class="col"></div>
-        <div class="col">
-            <div class="card card-event card-fade-in">
-                <div class="card-img-top event-img" style="background-image: url('static/assets/img/bt logo.png');  background-size: cover; background-position: center;"></div>
-                <!-- <img class='event-img img-fluid' src="static/assets/img/bt logo.png" alt="IMG">  -->
-                <div class="card-content">
-                    <h1 class="event-title"> Project Wednesdays</h1>
-                    <p class="event-desc"> 
-                        Project Wednesdays are a perfect opportunity for students to spend time exploring other interests outside of class. Sign up for your Project Wednesday here!
-                    </p>
-            </div>
-            </div>
-        </div>
-      
-        <div class="col">
-          <div class="card card-event card-fade-in">
-            <div class="card-img-top event-img" style="background-image: url('static/assets/img/bt logo.png'); background-size: cover; background-position: center;"></div>
-            <!-- <img class='event-img img-fluid' src="static/assets/img/bt logo.png" alt="IMG">  -->
-            <div class="card-content">
-                <h1 class="event-title"> Project Wednesdays</h1>
-                <p class="event-desc"> 
-                  Project Wednesdays are a perfect opportunity for students to spend time exploring other interests outside of class. Sign up for your Project Wednesday here!
-                </p>
-            </div>
-            </div>
-          </div>
-          <div class="col"></div>  
-      
-        </div>
-  
+
+      {%for event in events%}
+        {%if loop.index0 % 2 == 0%}
         <div class="row row-events">
+        {%endif%}
           <div class="col"></div>
           <div class="col">
               <div class="card card-event card-fade-in">
+                  {%if event.image == none or event.image == ''%}
                   <div class="card-img-top event-img" style="background-image: url('static/assets/img/bt logo.png');  background-size: cover; background-position: center;"></div>
+                  {%else%}
+                  <div class="card-img-top event-img" style="background-image: url('{{event.image}}');  background-size: cover; background-position: center;"></div>
+                  {%endif%}
                   <!-- <img class='event-img img-fluid' src="static/assets/img/bt logo.png" alt="IMG">  -->
                   <div class="card-content">
-                      <h1 class="event-title"> Project Wednesdays</h1>
+                      <h1 class="event-title"><a href="/events/project_wednesday"> {{event.name}}</a></h1>
                       <p class="event-desc"> 
-                          Project Wednesdays are a perfect opportunity for students to spend time exploring other interests outside of class. Sign up for your Project Wednesday here!
+                         {{event.description}}
                       </p>
-              </div>
+                 </div>
               </div>
           </div>
-        
-          <div class="col">
-            <div class="card card-event card-fade-in">
-              <div class="card-img-top event-img" style="background-image: url('static/assets/img/bt logo.png'); background-size: cover; background-position: center;"></div>
-              <!-- <img class='event-img img-fluid' src="static/assets/img/bt logo.png" alt="IMG">  -->
-              <div class="card-content">
-                  <h1 class="event-title"> Project Wednesdays</h1>
-                  <p class="event-desc"> 
-                    Project Wednesdays are a perfect opportunity for students to spend time exploring other interests outside of class. Sign up for your Project Wednesday here!
-                  </p>
-              </div>
-              </div>
-            </div>
+          {% if loop.index % 2 == 0 or loop.last %}
             <div class="col"></div>
-        
           </div>
-
+          {%endif%}
+          {% if loop.index % 1 == 0 and loop.last %}
+            <div class="col"></div>
+          </div>
+          {%endif%}
+      {%endfor%}
     </div>
 </div>
 

@@ -3,12 +3,12 @@ const upload_cycle = document.querySelector('.upload-cycle')
 const add_single_form = document.querySelector('.form-add-individual')
 const upload_cycle_form = document.querySelector('.form-upload-cycle')
 
-function show_add(){
+function show_add(e){
     add_single_form.style.display = 'block'
     upload_cycle_form.style.display = 'none'
 }
 
-function show_upload(){
+function show_upload(e){
     add_single_form.style.display = 'none'
     upload_cycle_form.style.display = 'block'
 }

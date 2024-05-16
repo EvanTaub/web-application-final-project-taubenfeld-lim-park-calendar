@@ -8,8 +8,12 @@
             <div class="p-3 py-5">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="row">
+                    <div class="card add-individual">
                     <h4 class="text-right add-individual mr-2">Add Single Project</h4>
+                    </div>
+                    <div class="card upload-cycle">
                     <h4 class="text-right upload-cycle ml-2">Upload Project Cycle (Multiple)</h4>
+                    </div>
                 </div>
                 </div>
 
@@ -18,7 +22,7 @@
                     
                     <div class="row mt-2">
                         <div class="col"></div>
-                        <div class="col-md-4" style="justify-content:center;"><label class="labels">Project Title</label> <input type="text" name="project_title" class="form-control" placeholder="Project Title"> </div>
+                        <div class="col-md-4" style="justify-content:center;"><label class="labels">Project Title</label> <input type="text" name="name" class="form-control" placeholder="Project Title"> </div>
                         <div class="col"></div>
                     </div>
 
@@ -28,13 +32,37 @@
                         <div class="col"></div>
                     </div>
 
-                    
+                    <!-- image accept needed -->
+
+                    <div class="row mt-1">
+                        <div class="col"></div>
+                        <div class="col-md-4" style="justify-content:center;"><label class="labels">Student Limit</label> <input type="number" name="student_limit" class="form-control" placeholder="0"> </div>
+                        <div class="col"></div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col"></div>
+                        <div class="col-md-4" style="justify-content:center;"><label class="labels">Teachers</label> <input type="text" name="teachers" class="form-control" placeholder="Teachers"> </div>
+                        <div class="col"></div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col"></div>
+                        <div class="col-md-4" style="justify-content:center;"><label class="labels">Student Assistant</label> <input type="text" name="student_assistant" class="form-control" placeholder="Student Assistant"> </div>
+                        <div class="col"></div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col"></div>
+                        <div class="col-md-4" style="justify-content:center;"><label class="labels">Special Notes</label> <input type="text" name="special_note" class="form-control" placeholder="Special Notes"></div>
+                        <div class="col"></div>
+                    </div>
 
                     <div class="row mt-3">
                         <div class="col"></div>
                         <div class="col-3" style="align-items:center;">
                             <label for="cycle">Cycle:</label>
-                            <select id="cycle" name="cycle">
+                            <select id="cycle_add" name="cycle">
                               <option value="1">1</option>
                               <option value="2">2</option>
                             </select>       
@@ -51,7 +79,7 @@
 
 
                 <!-- UPLOAD CYCLE FORM -->
-                <form method="POST" class="form-upload-cycle" enctype="multipart/form-data" action='/events'>
+                <form method="POST" class="form-upload-cycle" enctype="multipart/form-data" action='/events' style="display:block">
 
                     <div class="row mt-2">
                         <div class="col"></div>
@@ -69,7 +97,7 @@
                         <div class="col"></div>
                         <div class="col-3" style="align-items:center;">
                             <label for="cycle">Cycle:</label>
-                            <select id="cycle" name="cycle">
+                            <select id="cycle_upload" name="cycle">
                               <option value="1">1</option>
                               <option value="2">2</option>
                             </select>       

@@ -5,8 +5,9 @@ from sqlalchemy import JSON
 import json
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import Column, Integer, String, ForeignKey, LargeBinary, Boolean, Float, Table
+from sqlalchemy.orm.attributes import flag_modified
 from werkzeug.security import generate_password_hash, check_password_hash
-import csv
+import csv, io
 from extensions import db  
 from datetime import datetime
 
@@ -30,7 +31,7 @@ def load_create_default():
     return default_events
 
 def load_joined_users():
-    with open('static/assets/jsons/created_events.json', 'r') as file:
+    with open('static/assets/jsons/joined_users.json', 'r') as file:
         default_events = json.load(file)
     return default_events
 
@@ -65,7 +66,7 @@ class User(db.Model, UserMixin):
         # event = Event(**kwargs, creator=self)
         # db.session.add(event)
         # db.session.commit()
-        return # event
+        return # eventP
 
 class Teacher(User):
     __tablename__ = 'teacher'
@@ -93,7 +94,6 @@ class Event(db.Model, UserMixin):
 class ProjectWednesday(Event):
     id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
     cycle_number = db.Column(db.Integer, default=1, nullable=False)
-    title = db.Column(db.String(255), nullable=False, default='null')
     cost = db.Column(db.String(50), default = '0', nullable = True)
     teachers = db.Column(db.String(100), default = '', nullable = False)
     student_assistant = db.Column(db.String(50), default = '', nullable = True)
@@ -127,7 +127,7 @@ def upload_csv_tournaments(csv_data, creator_id):
             event = Tournaments(
                 name = row[0],
                 description = row[1],
-                student_limit = row[2],
+                student_limit = row[2], 
                 creator_id = creator_id,
                 cost_spectator = row[3],
                 cost_competitor = row[4],
@@ -144,7 +144,7 @@ def upload_csv_wednesday(csv_data, creator_id):
             print(row[3])
             try:
                 event = ProjectWednesday(
-                    title = row[0],
+                    name = row[0],
                     creator_id = creator_id,
                     teachers = row[1],
                     student_assistant = row[2],
@@ -160,3 +160,15 @@ def upload_csv_wednesday(csv_data, creator_id):
             except IntegrityError:
                 db.session.rollback()
         
+
+def join_project_wednesday(user_id, event_id):
+    current_event = Event.query.get(event_id)
+    current_event.participants["Joined Users"].append(user_id)
+    user = User.query.get(user_id)
+    user.joined_events["Project Wednesday"] = f"{current_event.name}"
+    flag_modified(current_event,'participants')
+    flag_modified(user,'joined_events')
+    db.commit()
+    return
+
+    
