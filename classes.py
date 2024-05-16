@@ -163,12 +163,31 @@ def upload_csv_wednesday(csv_data, creator_id):
 
 def join_project_wednesday(user_id, event_id):
     current_event = Event.query.get(event_id)
-    current_event.participants["Joined Users"].append(user_id)
     user = User.query.get(user_id)
+    current_event.participants["Joined Users"].append(user_id)
     user.joined_events["Project Wednesday"] = f"{current_event.name}"
     flag_modified(current_event,'participants')
     flag_modified(user,'joined_events')
-    db.commit()
+    db.session.commit()
     return
 
+def join_tournament(user_id, event_id):
+    current_event = Event.query.get(event_id)
+    user = User.query.get(user_id)
+    user.joined_events["Tournaments"].append(current_event.name)
+    current_event.participants["Joined Users"].append(user_id)
+    flag_modified(current_event,'participants')
+    flag_modified(user,'joined_events')
+    db.session.commit()
+    return
+
+def join_performance(user_id, event_id):
+    current_event = Event.query.get(event_id)
+    user = User.query.get(user_id)
+    user.joined_events["Performances"].append(current_event.name)
+    current_event.participants["Joined Users"].append(user_id)
+    flag_modified(current_event,'participants')
+    flag_modified(user,'joined_events')
+    db.session.commit()
+    return
     

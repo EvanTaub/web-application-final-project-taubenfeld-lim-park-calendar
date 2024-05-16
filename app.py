@@ -18,7 +18,7 @@ import base64, io
 from PIL import Image
 from flask_paginate import Pagination
 from datetime import datetime
-
+from sqlalchemy.orm.attributes import flag_modified
 import random
 # twilio test
 
@@ -288,12 +288,21 @@ def event():
             upload_csv_tournaments(csv_data)
             flash('Tournaments Added Successfully!', 'success')
             return redirect(url_for('event'))
+        if 'performance_submit_single' in request.form:
+            process_performance_data()
+            return redirect(url_for('index'))
+        if 'tournament_submit' in request.form:
+            process_tournament_data()
+            return redirect(url_for('index'))
         if "edit_event" in request.form:
             pass
             return render_template('events.html')
 
         flash('Invalid event submission.', 'error')
         return redirect(url_for('event'))
+    
+
+
 
 @app.route('/events/project_wednesday', methods=['GET', 'POST'])
 def display_pw():
@@ -304,8 +313,12 @@ def display_pw():
         if request.method == "POST":
             if 'join_button' in request.form:
                 if 'id' in session:
-                    join_project_wednesday(current_user.id, project_wednesday.id)
-                    flash("You have successfully joined the project!", "success")
+                    if current_user.joined_events["Project Wednesday"] != '':
+                        flash("You have already joined a Project Wednesday", 'warning')
+                        return redirect(url_for('event'))
+                    else:
+                        join_project_wednesday(current_user.id, project_wednesday.id)
+                        flash("You have successfully joined the project!", "success")
                 else:
                     flash("You must be logged in to make this action!", "danger")
 
@@ -327,34 +340,65 @@ def display_pw():
 @app.route("/add")
 # @login_required
 def add():
-    return render_template("event_determination.html")
+    return render_template("add_event_determination.html")
+
+def process_performance_data():
+    name = request.form['event_title']
+    description = request.form['event_description']
+    date = request.form['date_of_performance']
+    student_limit = request.form['student_limit']
+    if 'event_pic' not in request.files:
+        event_pic = ''
+    else:
+        event_pic_file = request.files['event_pic'] 
+        event_pic_data = event_pic_file.read()
+    cost_audience = request.form['cost_audience']
+
+    new_performance = Performances(
+        creator_id = current_user.id,
+        name = name,
+        description = description,
+        student_limit = student_limit,
+        image = event_pic_data,
+        date_of_performance = date,
+        cost_audience = cost_audience,
+    )
+    
+    db.session.add(new_performance)
+    db.session.commit()
+    image_data_b64 = base64.b64encode(new_performance.image).decode('utf-8')
+    
+def process_tournament_data():
+    name = request.form['event_title']
+    description = request.form['event_description']
+    date = request.form['date_of_tournament']
+    student_limit = request.form['student_limit']
+    if 'event_pic' not in request.files:
+        event_pic = ''
+    else:
+        event_pic = request.files['event_pic'] 
+    cost_competitor = request.form['cost_competitor']
+    cost_spectator = request.form['cost_spectator']
+
+    new_tournament = Tournaments(
+        creator_id = current_user.id,
+        name = name,
+        description = description,
+        student_limit = student_limit,
+        image = event_pic,
+        date_of_tournament = date,
+        cost_competitor = cost_competitor,
+        cost_spectator = cost_spectator
+    )
+    
+    db.session.add(new_tournament)
+    db.session.commit()
 
 @app.route("/add/performances", methods=['GET', 'POST'])
 # @login_required
 def add_performances():
     if request.method == "POST":
-        name = request.form['event_title']
-        description = request.form['event_description']
-        date = request.form['date_of_torunament']
-        student_limit = request.form['student_limit']
-        if 'event_pic' not in request.files:
-            event_pic = ''
-        else:
-            event_pic = request.files['event_pic'] 
-        cost_audience = request.form['cost_audience']
-
-        new_performance = Performances(
-            creator_id = current_user.id,
-            name = name,
-            description = description,
-            student_limit = student_limit,
-            image = event_pic,
-            date_of_tournament = date,
-            cost_audience = cost_audience,
-        )
         
-        db.session.add(new_performance)
-        db.session.commit()
         flash('Performance added successfully!', 'success')
         return redirect(url_for('add_performances'))
     return render_template("add-events-performance.html")
@@ -436,6 +480,7 @@ def email_verification():
 def profile():
     if request.method=='GET':  
         user = User.query.get(int(session['id']))
+        
         return render_template('profile.html', user=user)
     if request.method == "POST":
         print("ok so something happened")

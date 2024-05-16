@@ -1,5 +1,5 @@
 {% extends "base.html"%}
-{% block title %}PROJECT WEDNESDAY{% endblock %}
+{% block title %}PERFORMANCES{% endblock %}
 {% set active_page = 'events' %}
 {% block content %}
 <div class="container rounded bg-white mt-5 mb-5">
@@ -7,8 +7,8 @@
     <div class="row mt-2">
         <div class="col"></div>
         <div class="col-md-4" style="justify-content:center;">
-            <label class="labels">Project Title</label>
-            <input type="text" name="name" class="form-control" placeholder="Project Title" value="{{ event.name }}" readonly>
+            <label class="labels">Performance Name</label>
+            <input type="text" name="name" class="form-control" placeholder="Performance Name" value="{{ event.name }}" readonly>
         </div>
         <div class="col"></div>
     </div>
