@@ -122,38 +122,6 @@
 
 <div class="container-fluid" style="margin-top: 80px; justify-content:center">
     <div class="event-cards">
-      
-    <div class="row row-events">
-      <div class="col"></div>
-      <div class="col">
-          <div class="card card-event card-fade-in">
-              <div class="card-img-top event-img" style="background-image: url('static/assets/img/bt logo.png');  background-size: cover; background-position: center;"></div>
-              <!-- <img class='event-img img-fluid' src="static/assets/img/bt logo.png" alt="IMG">  -->
-              <div class="card-content">
-                  <h1 class="event-title"><a href="/events/project_wednesday"> Project Wednesdays</a></h1>
-                  <p class="event-desc"> 
-                      Project Wednesdays are a perfect opportunity for students to spend time exploring other interests outside of class. Sign up for your Project Wednesday here!
-                  </p>
-          </div>
-          </div>
-      </div>
-    
-      <div class="col">
-        <div class="card card-event card-fade-in">
-          <div class="card-img-top event-img" style="background-image: url('static/assets/img/bt logo.png'); background-size: cover; background-position: center;"></div>
-          <!-- <img class='event-img img-fluid' src="static/assets/img/bt logo.png" alt="IMG">  -->
-          <div class="card-content">
-              <h1 class="event-title"> Coffeehouse </h1>
-              <p class="event-desc"> 
-                Project Wednesdays are a perfect opportunity for students to spend time exploring other interests outside of class. Sign up for your Project Wednesday here!
-              </p>
-          </div>
-          </div>
-        </div>
-        <div class="col"></div>
-    </div>
-
-
       {%for event in events%}
         {%if loop.index0 % 2 == 0%}
         <div class="row row-events">
@@ -161,11 +129,12 @@
           <div class="col"></div>
           <div class="col">
               <div class="card card-event card-fade-in">
-                  {%if event.image == none or event.image == ''%}
+                  {%if event.image_b64 == ''%}
                   <div class="card-img-top event-img" style="background-image: url('static/assets/img/bt logo.png');  background-size: cover; background-position: center;"></div>
                   {%else%}
-                  <div class="card-img-top event-img" style="background-image: url('{{event.image}}');  background-size: cover; background-position: center;"></div>
+                  <div class="card-img-top event-img"  style="background-image: url('data:image/png;base64,{{ event.image_b64 }}');  background-size: cover; background-position: center;"></div>
                   {%endif%}
+                  <!-- src="data:image/png;base64,{{user_image}}" -->
                   <!-- <img class='event-img img-fluid' src="static/assets/img/bt logo.png" alt="IMG">  -->
                   <div class="card-content">
                       <h1 class="event-title"><a href="/events/project_wednesday"> {{event.name}}</a></h1>
@@ -180,6 +149,8 @@
           </div>
           {%endif%}
           {% if loop.index % 1 == 0 and loop.last %}
+            <div class="col"></div>
+            <div class="col"></div>
             <div class="col"></div>
           </div>
           {%endif%}

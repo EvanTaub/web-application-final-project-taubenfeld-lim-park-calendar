@@ -86,9 +86,10 @@ class Event(db.Model, UserMixin):
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(255), nullable=False, default='null')
     description = db.Column(db.Text, nullable=False, default='null')
-    image = db.Column(db.LargeBinary)
-    student_limit = db.Column(db.Integer, nullable = False)
-    participants = db.Column(JSON, default = load_joined_users)
+    image = db.Column(db.LargeBinary, nullable=True)  # Allow image to be None
+    student_limit = db.Column(db.Integer, nullable=False)
+    participants = db.Column(JSON, default=load_joined_users)
+
 
 
 class ProjectWednesday(Event):
@@ -117,9 +118,10 @@ class Performances(Event):
 def parse_csv_data(csv_file):
     text_data = csv_file.read().decode("utf-8")
     reader = csv.reader(io.StringIO(text_data))
-    headers = next(reader)
+    headers = next(reader)  # Skip header
     data = [row for row in reader]
     return data
+
 
 def upload_csv_tournaments(csv_data, creator_id):
     for row in csv_data:
@@ -141,24 +143,24 @@ def upload_csv_tournaments(csv_data, creator_id):
 
 def upload_csv_wednesday(csv_data, creator_id):
     for row in csv_data:
-            print(row[3])
-            try:
-                event = ProjectWednesday(
-                    name = row[0],
-                    creator_id = creator_id,
-                    teachers = row[1],
-                    student_assistant = row[2],
-                    description = row[3][:2500],
-                    cost = row[4],
-                    cycle_number = 2,
-                    student_limit = 20,
-                    special_note = row[5]
-                    )
-                print(event)
-                db.session.add(event)
-                db.session.commit()
-            except IntegrityError:
-                db.session.rollback()
+        try:
+            event = ProjectWednesday(
+                name=row[0],
+                creator_id=creator_id,
+                teachers=row[1],
+                student_assistant=row[2] if row[2] else '',
+                description=row[3][:2500],
+                cost=row[4],
+                cycle_number=int(row[6]),
+                student_limit=20,  # Assuming a default value of 20
+                special_note=row[5] if row[5] else '',
+                image=b''  # Explicitly set image to empty bytes
+            )
+            db.session.add(event)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+
         
 
 def join_project_wednesday(user_id, event_id):
@@ -168,7 +170,37 @@ def join_project_wednesday(user_id, event_id):
     user.joined_events["Project Wednesday"] = f"{current_event.name}"
     flag_modified(current_event,'participants')
     flag_modified(user,'joined_events')
-    db.commit()
+    db.session.commit()
+    return
+
+def attend_performance(user_id, event_id): #ㅋㅋㄹㅃㅃ
+    current_event = Event.query.get(event_id)
+    current_event.participants["Joined Users"].append(user_id)
+    user = User.query.get(user_id)
+    user.joined_events["Performance"] = f"{current_event.name}"
+    flag_modified(current_event,'participants')
+    flag_modified(user,'joined_events')
+    db.session.commit()
+    return
+
+def enter_tournament_compete(user_id, event_id): #ㅋㅋㄹㅃㅃ
+    current_event = Event.query.get(event_id)
+    current_event.participants["Joined Users"].append(user_id)
+    user = User.query.get(user_id)
+    user.joined_events["Tournaments Competeting"] = f"{current_event.name}"
+    flag_modified(current_event,'participants')
+    flag_modified(user,'joined_events')
+    db.session.commit()
+    return
+
+def enter_tournament_spectate(user_id, event_id): #ㅋㅋㄹㅃㅃ
+    current_event = Event.query.get(event_id)
+    current_event.participants["Joined Users"].append(user_id)
+    user = User.query.get(user_id)
+    user.joined_events["Tournaments Spectating"] = f"{current_event.name}"
+    flag_modified(current_event,'participants')
+    flag_modified(user,'joined_events')
+    db.session.commit()
     return
 
     
