@@ -315,7 +315,7 @@ def display_pw():
     num_events = len(projects)
     if num_events == 0:
         flash('There is no Project Wednesday Cycle to join currently.', 'warning')
-        return render_template('index.html')
+        return redirect(url_for('index'))
     if 'event_id' in request.args:
         event_id = request.args.get('event_id')
         project_wednesday = ProjectWednesday.query.get(event_id)
@@ -343,7 +343,7 @@ def display_performances():
     num_events = len(performances)
     if num_events == 0:
         flash('There are no performances at this time.', 'warning')
-        return url_for('index')
+        return redirect(url_for('index'))
     if 'event_id' in request.args:
         event_id = request.args.get('event_id')
         performance = Performances.query.get(event_id)
@@ -367,7 +367,7 @@ def display_tournaments():
     num_events = len(tournaments)
     if num_events == 0:
         flash('There are no tournaments at this time.', 'warning')
-        return url_for('index')
+        return redirect(url_for('index'))
     if 'event_id' in request.args:
         event_id = request.args.get('event_id')
         tournament = Tournaments.query.get(event_id)
