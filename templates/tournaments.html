@@ -1,5 +1,5 @@
 {%extends "base.html"%}
-{%block title%} EVENTS {%endblock%}
+{%block title%} TOURNAMENTS {%endblock%}
 {%set active_page='events'%}
 {%block content%} 
 <style>
@@ -128,21 +128,21 @@
         {%endif%}
           <div class="col"></div>
           <div class="col">
+            <a href="{{url_for('display_tournaments', event_id = event.id)}}">
               <div class="card card-event card-fade-in">
                   {%if event.image_b64 == ''%}
                   <div class="card-img-top event-img" style="background-image: url('static/assets/img/bt logo.png');  background-size: cover; background-position: center;"></div>
                   {%else%}
                   <div class="card-img-top event-img"  style="background-image: url('data:image/png;base64,{{ event.image_b64 }}');  background-size: cover; background-position: center;"></div>
                   {%endif%}
-                  <!-- src="data:image/png;base64,{{user_image}}" -->
-                  <!-- <img class='event-img img-fluid' src="static/assets/img/bt logo.png" alt="IMG">  -->
                   <div class="card-content">
-                      <h1 class="event-title"><a href="/events/project_wednesday"> {{event.name}}</a></h1>
-                      <p class="event-desc"> 
+                      <h1 class="event-title" style='color:black'>{{event.name}}</h1>
+                      <p class="event-desc" style='color:black'> 
                          {{event.description}}
                       </p>
                  </div>
               </div>
+            </a>
           </div>
           {% if loop.index % 2 == 0 or loop.last %}
             <div class="col"></div>
@@ -160,5 +160,5 @@
 
 <script src="static/assets/js/event.js"></script>
 {%endblock%}
-{%block main_css%} <link href="static/assets/css/style.css" rel="stylesheet"> {%endblock%}
+{%block main_css%} <link href="{{ url_for('static', filename='assets/css/style.css') }}" rel="stylesheet"> {%endblock%}
 
