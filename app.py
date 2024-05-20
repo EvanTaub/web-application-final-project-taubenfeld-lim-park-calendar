@@ -27,7 +27,8 @@ from twilio.rest import Client
 
 from database import login_manager
 from account_management import login_management, logout_main, register_main, load_user_main
-from classes import User, SuperAdmin, Admin, Teacher, ProjectWednesday, Event, Tournaments,Performances, parse_csv_data, upload_csv_tournaments, upload_csv_wednesday, join_project_wednesday, attend_performance, enter_tournament_compete, enter_tournament_spectate
+from classes import User, SuperAdmin, Admin, Teacher, ProjectWednesday, Event, Tournaments,Performances, parse_csv_data, upload_csv_tournaments, upload_csv_wednesday, enter_event
+#import from classes these old functions? -> join_project_wednesday, attend_performance, enter_tournament_compete, enter_tournament_spectate,
 
 from extensions import db, login_manager  # Adjust the import path as necessary
 
@@ -267,12 +268,12 @@ def event():
         # offset = (page - 1) * events_per_page
         return render_template('view_event_determination.html')
     if request.method == "POST":
-        if "add_event" in request.form:
-            event_title = request.form.get('event_title')
-            event_type = request.form.get('event_type')
-            event_description = request.form.get('event_description')
+        # if "add_event" in request.form:
+        #     event_title = request.form.get('event_title')
+        #     event_type = request.form.get('event_type')
+        #     event_description = request.form.get('event_description')
             
-            return render_template('events.html')
+        #     return render_template('events.html')
         # Adds Project Wednesday events in bulk using csv parsing
         if "cycle_submit" in request.form:
             csv_file = request.files["csv_file"]
@@ -280,7 +281,18 @@ def event():
             upload_csv_wednesday(csv_data, current_user.id)
             flash('Events Successfully Added!', 'success')
             return redirect(url_for('event'))
-    
+        if "tournament_submit" in request.form:
+            process_tournament_data()
+            # flash('Events Successfully Added!', 'success')
+            return redirect(url_for('event'))
+        if "performance_submit" in request.form:
+            process_performance_data()
+            return redirect(url_for('event'))
+        
+        if "project_submit" in request.form:
+            process_project_data()
+            return redirect(url_for('event'))
+
 
         # Adds Tournament events in bulk
         if 'tournaments_submit' in request.form:
@@ -299,6 +311,11 @@ def event():
 
 @app.route('/events/project_wednesday', methods=['GET', 'POST'])
 def display_pw():
+    projects = ProjectWednesday.query.all() #filter(not_(ProjectWednesday.cycle_number)).all()
+    num_events = len(projects)
+    if num_events == 0:
+        flash('There is no Project Wednesday Cycle to join currently.', 'warning')
+        return render_template('index.html')
     if 'event_id' in request.args:
         event_id = request.args.get('event_id')
         project_wednesday = ProjectWednesday.query.get(event_id)
@@ -310,7 +327,7 @@ def display_pw():
                         flash("You have already joined a Project Wednesday", 'warning')
                         return redirect(url_for('event'))
                     else:
-                        join_project_wednesday(current_user.id, project_wednesday.id)
+                        enter_event(current_user.id, project_wednesday.id, "Project Wednesday")
                         flash("You have successfully joined the project!", "success")
                 else:
                     flash("You must be logged in to make this action!", "danger")
@@ -322,39 +339,53 @@ def display_pw():
 
 @app.route('/events/performances', methods=['GET', 'POST'])
 def display_performances(): 
+    performances = Performances.query.all() #filter(not_(ProjectWednesday.cycle_number)).all()
+    num_events = len(performances)
+    if num_events == 0:
+        flash('There are no performances at this time.', 'warning')
+        return url_for('index')
     if 'event_id' in request.args:
         event_id = request.args.get('event_id')
         performance = Performances.query.get(event_id)
-
+        performance_date = performance.date.strftime('%Y-%m-%dT%H:%M')
         if request.method == "POST":
             if 'join_button' in request.form:
                 if 'id' in session:
-                    attend_performance(current_user.id, performance.id)
+                    enter_event(current_user.id, performance.id, "Performances")
                     flash("You have successfully ticketed for the performance!", "success")
                 else:
                     flash("You must be logged in to make this action!", "danger")
 
-        return render_template('view_performance.html', event=performance)
+        return render_template('view_performance.html', event=performance, event_date=performance_date)
 
     events = Performances.query.all()
     return render_template('performances.html', events=events)
 
 @app.route('/events/tournaments', methods=['GET', 'POST'])
 def display_tournaments(): 
+    tournaments = Tournaments.query.all() #filter(not_(ProjectWednesday.cycle_number)).all()
+    num_events = len(tournaments)
+    if num_events == 0:
+        flash('There are no tournaments at this time.', 'warning')
+        return url_for('index')
     if 'event_id' in request.args:
         event_id = request.args.get('event_id')
         tournament = Tournaments.query.get(event_id)
+        print(tournament)
+        if not isinstance(tournament, Tournaments):
+            flash('That event is not a tournament', 'danger')
+            return redirect(url_for('event'))
 
         if request.method == "POST":
             if 'join_button_competitor' in request.form:
                 if 'id' in session:
-                    enter_tournament_compete(current_user.id, tournament.id)
+                    enter_event(current_user.id, tournament.id, "Tournaments Competing")
                     flash("You have successfully entered the tournament as a competitor!", "success")
                 else:
                     flash("You must be logged in to make this action!", "danger")
             if 'join_button_spectator' in request.form:
                 if 'id' in session:
-                    enter_tournament_spectate(current_user.id, tournament.id)
+                    enter_event(current_user.id, tournament.id, "Tournaments Spectating")
                     flash("You have successfully registered as a spectator for this tournament!", "success")
                 else:
                     flash("You must be logged in to make this action!", "danger")
@@ -377,33 +408,33 @@ def display_tournaments():
 @app.route("/add")
 # @login_required
 def add():
-    return render_template("event_determination.html")
+    return render_template("add_event_determination.html")
 
-@app.route("/add/performances", methods=['GET', 'POST'])
-# @login_required
-def add_performances():
-    if request.method == "POST":
-        name = request.form['event_title']
-        description = request.form['event_description']
-        date = request.form['date_of_torunament']
-        student_limit = request.form['student_limit']
-        if 'event_pic' not in request.files:
-            event_pic = ''
-        else:
-            event_pic = request.files['event_pic'] 
-        cost_audience = request.form['cost_audience']
+# @app.route("/add/performances", methods=['GET', 'POST'])
+# # @login_required
+# def add_performances():
+#     if request.method == "POST":
+#         name = request.form['event_title']
+#         description = request.form['event_description']
+#         date = request.form['date_of_torunament']
+#         student_limit = request.form['student_limit']
+#         if 'event_pic' not in request.files:
+#             event_pic = ''
+#         else:
+#             event_pic = request.files['event_pic'] 
+#         cost_audience = request.form['cost_audience']
 
-        new_performance = Performances(
-            creator_id = current_user.id,
-            name = name,
-            description = description,
-            student_limit = student_limit,
-            image = event_pic,
-            date_of_tournament = date,
-            cost_audience = cost_audience,
-        )
+#         new_performance = Performances(
+#             creator_id = current_user.id,
+#             name = name,
+#             description = description,
+#             student_limit = student_limit,
+#             image = event_pic,
+#             date_of_tournament = date,
+#             cost_audience = cost_audience,
+#         )
         
-        flash('Performance added successfully!', 'success')
+#         flash('Performance added successfully!', 'success')
         
 #IMAGE PROCESSING WITH PERFORMANCE MUST BE DONE.
 
@@ -438,11 +469,68 @@ def process_tournament_data():
         db.session.add(new_tournament)
         db.session.commit()
         
+        flash('Tournament added successfully!', 'success')
+
+def process_project_data():
+        name = request.form['name']
+        description = request.form['project_description']
+        student_limit = request.form['student_limit']
+        teachers = request.form['teachers']
+        student_assistant = request.form['student_assistant']
+        special_note = request.form['special_note']
+        cycle_num = request.form['cycle']
+        if request.form['cost'] != '':
+            cost = request.form['cost']
+        new_tournament = Tournaments(
+            creator_id = current_user.id,
+            name = name,
+            description = description,
+            student_limit = student_limit,
+            cycle_number = cycle_num,
+            teachers = teachers,
+            student_assistant = student_assistant,
+            special_note = special_note,
+        )
+        
+        db.session.add(new_tournament)
+        db.session.commit()
+        
+        flash('Tournament added successfully!', 'success')
+
+def process_performance_data():
+        name = request.form['event_title']
+        description = request.form['event_description']
+        datetime_data = request.form['date_of_performance']
+        date = datetime.strptime(datetime_data, '%Y-%m-%dT%H:%M')
+        student_limit = request.form['student_limit']
+        if 'event_pic' not in request.files:
+            event_pic_data = ''
+        else:
+            event_pic_file = request.files['event_pic'] 
+            event_pic_data = event_pic_file.read()
+            image_data_b64 = base64.b64encode(event_pic_data).decode('utf-8')
+        cost_audience = request.form['cost_audience']
+
+        new_performance = Performances(
+            creator_id = current_user.id,
+            name = name,
+            description = description,
+            student_limit = student_limit,
+            image = event_pic_data,
+            image_b64 = image_data_b64,
+            date_of_performance = date,
+            cost_audience = cost_audience
+        )
+        
+        db.session.add(new_performance)
+        db.session.commit()
+        
         flash('Performance added successfully!', 'success')
+
 
 @app.route("/add/performances", methods=['GET', 'POST'])
 # @login_required
-def add_performances():
+def add_performance_route():
     return render_template("add-events-performance.html")
 
 @app.route("/add/project_wednesdays", methods=['GET', 'POST'])
@@ -522,8 +610,10 @@ def email_verification():
 def profile():
     if request.method=='GET':  
         user = User.query.get(int(session['id']))
-        
-        return render_template('profile.html', user=user)
+        p_wed = Event.query.filter_by(name = user.joined_events["Project Wednesday"]).first()
+        tournaments_s = [tournament for tournament in Tournaments.query.all() if user.id in tournament.participants["Joined Users"]]
+        tournaments_c = [tournament for tournament in Tournaments.query.all() if user.id in tournament.participants["Competitors"]]
+        return render_template('profile.html', user=user, event = p_wed, tournaments_c = tournaments_c, tournaments_s = tournaments_s)
     if request.method == "POST":
         print("ok so something happened")
         # return render_template('profile.html', user=user)
