@@ -1,61 +1,10 @@
 {% extends "base.html"%}
-{%block title%}MY PROFILE{%endblock%}
-{%set active_page = 'profile'%}
-{%block content%}
+{% block title %}MY PROFILE{% endblock %}
+{% set active_page = 'profile' %}
+{% block content %}
 <div class="container rounded bg-white mt-5 mb-5">
-    
-    <form action="/profile" enctype="multipart/form-data" method = "POST">
-        <div class="row">
-            <div class="col-md-3 border-right">
-                <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-                    <!-- <div class="image-container">
-                        <img class = 'rounded-circle mt-5 img-profile'src="data:image/png;base64,{{user_image}}" alt="Image">
-                        <div class="overlay">
-                            <input type="file" class="form-control update-button" name="profile_pic" accept=".jpg, .png" aria-describedby="basic-addon1" required>
-                        </div>
-                        <div>
-                        <button class="btn btn-primary profile-button" type="submit" name = 'picture_submit' id = 'save_button'>Save Photo</button>
-                        </div>
-     
-                        </div> -->
-                    </div>
-                </div>
-            
-        </form>
-        
-
-        <div class="col-md-5 border-right">
-            <div class="p-3 py-5">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="text-right">Profile Settings</h4>
-                </div>
-
-                <form method="POST" action='/profile'>
-                <div class="row mt-2">
-                    <div class="col-md-6"><label class="labels">First Name</label><input type="text" name="newfirstname" class="form-control" placeholder="{{user.first_name}}" value=""></div>
-                    <div class="col-md-6"><label class="labels">Last Name</label><input type="text" name="newlastname" class="form-control" value="" placeholder="{{user.last_name}}"></div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-md-12"><label class="labels">Email</label><input type="text" name="newemail" class="form-control" placeholder="{{user.email}}" value=""></div>
-                </div>
-                <span></span>
-                <!-- <div class="form-check form-switch justify-content-center">
-                    <input class="form-check-input" type="checkbox" role="switch" name="MFA" id="flexSwitchCheckDefault" onclick='toggleInput()' {%if user.MFA == True%} checked {%endif%}>
-                    <label class="form-check-label" for="flexSwitchCheckDefault">Enable Multi-Factor Authentication</label>
-                  </div> -->
-                <div class="mt-5 text-center"><button type="submit" class="btn btn-primary profile-button" name='profile_submit'>Edit Profile</button></div>
-                </form>
-
-                <form method="POST" action='/profile'>
-                <div class='row mt-5'>
-                    <div class="col-md-12"><label class="labels">Change Password</label><input type="password" name="oldpass" class="form-control" placeholder="Old Password" value=""></div>
-                    <div class="col-md-12"><label class="labels">New Password</label><input type="password" name="newpass" class="form-control" placeholder="New Password" value=""></div>
-                </div>
-                <div class="mt-5 text-center"><button type="submit" class="btn btn-primary profile-button" name='password_submit'> Change Password </button></div>
-                </form>
-
-            </div>
-        </div>
+    <div class="row">
+        <!-- Left side for signed-up events -->
         <div class="col-md-5 border-right">
             <div class="p-3 py-5">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -63,30 +12,51 @@
                 </div>
                 <div class="col-md-12">
                     <h3>Project Wednesday</h3>
-                    <h4><a href="{{url_for('display_pw', event_id = event.id)}}">{{user.joined_events["Project Wednesday"]}}</a></h4>
+                    <h4><a href="{{ url_for('display_pw', event_id=event.id) }}">{{ user.joined_events["Project Wednesday"] }}</a></h4>
                 </div>
                 <div class="col-md-12">
-                    <h3>Tournaments (Specating)</h3>
-                    {%for tournament_s in tournaments_s%}
-                    <h4><a href="{{url_for('display_pw', event_id = tournament_s.id)}}">{{tournament_s.name}}</a></h4>
-                    {%endfor%}
+                    <h3>Tournaments (Spectating)</h3>
+                    {% for tournament_s in tournaments_s %}
+                    <h4><a href="{{ url_for('display_tournaments', event_id=tournament_s.id) }}">{{ tournament_s.name }}</a></h4>
+                    {% endfor %}
                 </div>
                 <div class="col-md-12">
                     <h3>Tournaments (Competing)</h3>
-                    {%for tournament_c in tournaments_c%}
-                    <h4><a href="{{url_for('display_pw', event_id = tournament_c.id)}}">{{tournament_c.name}}</a></h4>
-                    {%endfor%}
+                    {% for tournament_c in tournaments_c %}
+                    <h4><a href="{{ url_for('display_tournaments', event_id=tournament_c.id) }}">{{ tournament_c.name }}</a></h4>
+                    {% endfor %}
                 </div>
-                
-
             </div>
         </div>
-
+        
+        <!-- Right side for read-only profile information -->
+        <div class="col-md-7">
+            <div class="p-3 py-5">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="text-right">Profile Information</h4>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <label class="labels">First Name</label>
+                        <input type="text" class="form-control" value="{{ user.first_name }}" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="labels">Last Name</label>
+                        <input type="text" class="form-control" value="{{ user.last_name }}" readonly>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <label class="labels">Email</label>
+                        <input type="text" class="form-control" value="{{ user.email }}" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-</div>
-</div>
+{% endblock %}
 
-{%endblock%}
-
-{%block main_css%} <link href="{{ url_for('static', filename='assets/css/style.css') }}" rel="stylesheet"> {%endblock%}
+{% block main_css %}
+<link href="{{ url_for('static', filename='assets/css/style.css') }}" rel="stylesheet">
+{% endblock %}

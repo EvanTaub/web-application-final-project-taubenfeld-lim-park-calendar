@@ -33,7 +33,7 @@
 
     <div class="row mt-3">
         <div class="col"></div>
-        <div class="col-md-4" style="align-items:center"><label class="labels">Date/Time</label><input type="datetime-local" id="date_of_performance" name="date_of_performance" value={{event.date}} readonly> </div>
+        <div class="col-md-4" style="align-items:center"><label class="labels">Date/Time</label><input type="datetime-local" id="date_of_tournament" name="date_of_tournament" value={{event_date}} readonly> </div>
         <div class="col"></div>
     </div>    
 
@@ -58,6 +58,25 @@
     </div>
 
     <!-- Sign Up Button -->
+    {%if user != ''%}
+    {%if user.id in event.participants["Competitors"] or user.id in event.participants["Joined Users"]%}
+    <form method="POST">
+        <div class="mt-5 text-center">
+            <button type="submit" class="btn btn-secondary-emphasis profile-button" name="join_button_competitor" disabled>Sign Up as Competitor</button>
+        </div>
+    </form>
+
+    <form method="POST">
+        <div class="mt-2 text-center">
+            <button type="submit" class="btn btn-secondary-emphasis profile-button" name="join_button_spectator" disabled>Sign Up as Spectator</button>
+        </div>
+    </form>
+    <form method="POST">
+        <div class="mt-2 text-center">
+            <button type="submit" class="btn btn-danger profile-button" name="leave_event">Leave Event</button>
+        </div>
+    </form>
+    {%else%}
     <form method="POST">
         <div class="mt-5 text-center">
             <button type="submit" class="btn btn-primary profile-button" name="join_button_competitor">Sign Up as Competitor</button>
@@ -69,6 +88,9 @@
             <button type="submit" class="btn btn-primary profile-button" name="join_button_spectator">Sign Up as Spectator</button>
         </div>
     </form>
+   
+    {%endif%}
+    {%endif%}
 </div>
 {% endblock %}
 

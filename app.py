@@ -252,6 +252,7 @@ def load_user(user_id):
 @login_required
 def logout():
     logout_main()
+    session.pop('id')
     return redirect(url_for('index'))
 
 
@@ -347,7 +348,7 @@ def display_performances():
     if 'event_id' in request.args:
         event_id = request.args.get('event_id')
         performance = Performances.query.get(event_id)
-        performance_date = performance.date.strftime('%Y-%m-%dT%H:%M')
+        performance_date = performance.date_of_performance.strftime('%Y-%m-%dT%H:%M')
         if request.method == "POST":
             if 'join_button' in request.form:
                 if 'id' in session:
@@ -371,6 +372,7 @@ def display_tournaments():
     if 'event_id' in request.args:
         event_id = request.args.get('event_id')
         tournament = Tournaments.query.get(event_id)
+        tournament_date = tournament.date_of_tournament.strftime('%Y-%m-%dT%H:%M')
         print(tournament)
         if not isinstance(tournament, Tournaments):
             flash('That event is not a tournament', 'danger')
@@ -389,8 +391,9 @@ def display_tournaments():
                     flash("You have successfully registered as a spectator for this tournament!", "success")
                 else:
                     flash("You must be logged in to make this action!", "danger")
-
-        return render_template('view_tournament.html', event=tournament)
+        if 'id' in session:
+            return render_template('view_tournament.html', event=tournament, user = current_user, event_date = tournament_date)
+        return render_template('view_tournament.html', event=tournament, user = '', event_date = tournament_date)
 
     events = Tournaments.query.all()
     return render_template('tournaments.html', events=events)
