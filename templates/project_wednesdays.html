@@ -39,8 +39,12 @@
     }
 
     .event-desc {
-      max-height: 100px;
+      max-height: 95px;
       transition: max-height 0.5s ease;
+    }
+
+    .scroll {
+      overflow-y: scroll;
     }
 
     .event-img {
@@ -202,7 +206,10 @@
         justify-content: center;
         align-items: center;
       }
-    
+      
+      .cycle-num {
+        float: right;
+      }
     </style>
 
 <h1 class="header-text"> Project Wednesdays </h1>      
@@ -223,8 +230,13 @@
                 {%endif%}
                 <!-- <img class='event-img img-fluid' src="static/assets/img/bt logo.png" alt="IMG">  -->
                 <div class="card-content">
-                    <h1 class="event-title"><a href="{{url_for('display_pw', event_id = event.id)}}">{{event.name}}</a> </h1>
+                    <h1 class="event-title"><a href="{{url_for('display_pw', event_id = event.id)}}">{{event.name}}</a> <span class="cycle-num" style="font-size:15px"> Cycle: {{event.cycle_number}}</span></h1>
+                    <p> Description: </p>
+                    {%if event.description|length > 245%}
+                    <p class="event-desc scroll"> 
+                    {%else%}
                     <p class="event-desc"> 
+                    {%endif%}
                        {{event.description}}
                     </p>
                </div>

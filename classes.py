@@ -231,3 +231,22 @@ def enter_event(user_id, event_id, param): #pass dictionary parameter as a strin
     flag_modified(user,'joined_events')
     db.session.commit()
     return
+
+def leave_event(user_id, event_id, param):
+    current_event = Event.query.get(event_id)
+    user = User.query.get(user_id)
+    # check if used for project wednesday
+    if param == 'Project Wednesday':
+        user.joined_events[param] = ''
+        current_event.participants["Joined Users"].pop(current_event.participants["Joined Users"].index(user_id))
+    else:
+        if param == 'Tournaments Competing':
+            current_event.participants["Competitors"].pop(current_event.participants["Competitors"].index(user_id))
+        else:
+            current_event.participants["Joined Users"].pop(current_event.participants["Joined Users"].index(user_id))
+        user.joined_events[param].pop(user.joined_events[param].index(current_event.name))
+    flag_modified(current_event,'participants')
+    flag_modified(user,'joined_events')
+    db.session.commit()
+    return
+    

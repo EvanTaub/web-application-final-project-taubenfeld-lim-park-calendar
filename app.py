@@ -27,7 +27,7 @@ from twilio.rest import Client
 
 from database import login_manager
 from account_management import login_management, logout_main, register_main, load_user_main
-from classes import User, SuperAdmin, Admin, Teacher, ProjectWednesday, Event, Tournaments,Performances, parse_csv_data, upload_csv_tournaments, upload_csv_wednesday, enter_event
+from classes import User, SuperAdmin, Admin, Teacher, ProjectWednesday, Event, Tournaments,Performances, parse_csv_data, upload_csv_tournaments, upload_csv_wednesday, enter_event, leave_event
 #import from classes these old functions? -> join_project_wednesday, attend_performance, enter_tournament_compete, enter_tournament_spectate,
 
 from extensions import db, login_manager  # Adjust the import path as necessary
@@ -391,6 +391,18 @@ def display_tournaments():
                     flash("You have successfully registered as a spectator for this tournament!", "success")
                 else:
                     flash("You must be logged in to make this action!", "danger")
+            if 'leave_event' in request.form:
+                if 'id' in session:
+                    if current_user.id in tournament.participants["Competitors"]:
+                        leave_event(current_user.id, tournament.id, "Tournaments Competing")
+                        flash("You have successfully registered left this tournament!", "success")
+                    elif current_user.id in tournament.participants["Joined Users"]:
+                        leave_event(current_user.id, tournament.id, "Tournaments Spectating")
+                        flash("You have successfully registered left this tournament!", "success")
+                    else:
+                        flash("You have not joined this event", 'warning')
+                else:
+                    flash("You must be logged in to make this action!", "danger")
         if 'id' in session:
             return render_template('view_tournament.html', event=tournament, user = current_user, event_date = tournament_date)
         return render_template('view_tournament.html', event=tournament, user = '', event_date = tournament_date)
@@ -608,41 +620,36 @@ def edit():
 def email_verification():
     pass
 
-@app.route('/profile', methods=["GET","POST"])
+@app.route('/profile', methods=["GET", "POST"])
 @login_required
 def profile():
-    if request.method=='GET':  
-        user = User.query.get(int(session['id']))
-        p_wed = Event.query.filter_by(name = user.joined_events["Project Wednesday"]).first()
+    user = User.query.get(int(session['id']))
+    if request.method == 'GET':
+        p_wed = Event.query.filter_by(name=user.joined_events.get("Project Wednesday")).first()
         tournaments_s = [tournament for tournament in Tournaments.query.all() if user.id in tournament.participants["Joined Users"]]
         tournaments_c = [tournament for tournament in Tournaments.query.all() if user.id in tournament.participants["Competitors"]]
-        return render_template('profile.html', user=user, event = p_wed, tournaments_c = tournaments_c, tournaments_s = tournaments_s)
+        return render_template('profile.html', user=user, event=p_wed, tournaments_c=tournaments_c, tournaments_s=tournaments_s)
+    
     if request.method == "POST":
-        print("ok so something happened")
-        # return render_template('profile.html', user=user)
-        user = User.query.get(int(session['id'])) 
         if 'profile_submit' in request.form:
             first_name = request.form.get('newfirstname')
             last_name = request.form.get('newlastname')
             email = request.form.get('newemail')
             
-            print(first_name)
-            print(last_name)
-            print(email)
-            if first_name != '':
+            if first_name:
                 user.first_name = first_name
-            if last_name != '':
+            if last_name:
                 user.last_name = last_name
-            if email != '':
+            if email:
                 user.email = email
             db.session.commit()
             flash("Profile Information Edited Successfully!", "success")
             return redirect(url_for('profile'))
+        
         elif "password_submit" in request.form:
             new_password = request.form.get("newpass")
             old_password = request.form.get('oldpass')
             if user and user.check_password(old_password):
-                print('true')
                 user.set_password(new_password)
                 db.session.commit()
                 flash("Password Successfully Changed!", 'success')
@@ -650,6 +657,7 @@ def profile():
             else:
                 flash('Incorrect Password!', 'danger')
                 return redirect(url_for('profile'))
+
 
 
 # edit / add / profile 
@@ -738,7 +746,22 @@ def promote_self_to_superadmin():
     else:
         print(f"User with email {email} not found.")
 
-# Process CSV file
+
+
+@app.route('/admin/users')
+def admin_users():
+    users = User.query.all()
+    return render_template('admin_users.html', users=users)
+
+@app.route('/admin/user/<int:user_id>')
+@login_required
+def view_user_profile(user_id):
+    user = User.query.get_or_404(user_id)
+    p_wed = Event.query.filter_by(name=user.joined_events.get("Project Wednesday")).first()
+    tournaments_s = [tournament for tournament in Tournaments.query.all() if user.id in tournament.participants["Joined Users"]]
+    tournaments_c = [tournament for tournament in Tournaments.query.all() if user.id in tournament.participants["Competitors"]]
+    return render_template('profile.html', user=user, event=p_wed, tournaments_c=tournaments_c, tournaments_s=tournaments_s)
+
         
 
 

@@ -1,5 +1,5 @@
-{% extends "base.html"%}
-{% block title %}MY PROFILE{% endblock %}
+{% extends "base.html" %}
+{% block title %}{{ user.first_name }}'s Profile{% endblock %}
 {% set active_page = 'profile' %}
 {% block content %}
 <div class="container rounded bg-white mt-5 mb-5">
@@ -12,19 +12,31 @@
                 </div>
                 <div class="col-md-12">
                     <h3>Project Wednesday</h3>
-                    <h4><a href="{{ url_for('display_pw', event_id=event.id) }}">{{ user.joined_events["Project Wednesday"] }}</a></h4>
+                    {% if event %}
+                        <h4><a href="{{ url_for('display_pw', event_id=event.id) }}">{{ user.joined_events.get("Project Wednesday") }}</a></h4>
+                    {% else %}
+                        <p>No joined events</p>
+                    {% endif %}
                 </div>
                 <div class="col-md-12">
                     <h3>Tournaments (Spectating)</h3>
-                    {% for tournament_s in tournaments_s %}
-                    <h4><a href="{{ url_for('display_tournaments', event_id=tournament_s.id) }}">{{ tournament_s.name }}</a></h4>
-                    {% endfor %}
+                    {% if tournaments_s %}
+                        {% for tournament_s in tournaments_s %}
+                            <h4><a href="{{ url_for('display_tournaments', event_id=tournament_s.id) }}">{{ tournament_s.name }}</a></h4>
+                        {% endfor %}
+                    {% else %}
+                        <p>No spectating tournaments</p>
+                    {% endif %}
                 </div>
                 <div class="col-md-12">
                     <h3>Tournaments (Competing)</h3>
-                    {% for tournament_c in tournaments_c %}
-                    <h4><a href="{{ url_for('display_tournaments', event_id=tournament_c.id) }}">{{ tournament_c.name }}</a></h4>
-                    {% endfor %}
+                    {% if tournaments_c %}
+                        {% for tournament_c in tournaments_c %}
+                            <h4><a href="{{ url_for('display_tournaments', event_id=tournament_c.id) }}">{{ tournament_c.name }}</a></h4>
+                        {% endfor %}
+                    {% else %}
+                        <p>No competing tournaments</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
