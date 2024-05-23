@@ -141,13 +141,20 @@
                   <!-- src="data:image/png;base64,{{user_image}}" -->
                   <!-- <img class='event-img img-fluid' src="static/assets/img/bt logo.png" alt="IMG">  -->
                   <div class="card-content">
-                     {%if event.__class__.__name__ == 'ProjectWednesday'%}
+                     <!-- {%if hasattr(event, 'special_note') %}
                      <h1 class="event-title"><a href="{{url_for('display_pw', event_id = event.id)}}">{{event.name}}</a> <span class="content-right" style="font-size:15px"> <a href="{{url_for('remove_event', event_id = event.id)}}"> REMOVE </a> Cycle: {{event.cycle_number}}</span></h1>
-                     {%elif event.__class__.__name__ == 'Performances'%}
+                     {%elif hasattr(event, 'date_of_performance')%}
                      <h1 class="event-title"><a href="{{url_for('display_performances', event_id = event.id)}}">{{event.name}}</a> <span class="content-right" style="font-size:15px"> <a href="{{url_for('remove_event', event_id = event.id)}}"> REMOVE </a> </span></h1>
-                     {%elif event.__class__.__name__ == 'Tournaments'%}
+                     {%elif hasattr(event, 'date_of_tournament')%}
                      <h1 class="event-title"><a href="{{url_for('display_tournaments', event_id = event.id)}}">{{event.name}}</a> <span class="content-right" style="font-size:15px"> <a href="{{url_for('remove_event', event_id = event.id)}}"> REMOVE </a> </span></h1>
-                     {%endif%} 
+                     {%endif%}  -->
+                     <!-- {%if hasattr(event, 'special_note') %}
+                     <h1 class="event-title"><a href="{{url_for('display_pw', event_id = event.id)}}">{{event.name}}</a> <span class="content-right" style="font-size:15px"> <a href="{{url_for('remove_event', event_id = event.id)}}"> REMOVE </a> Cycle: {{event.cycle_number}}</span></h1>
+                     {%elif hasattr(event, 'date_of_performance')%}
+                     <h1 class="event-title"><a href="{{url_for('display_performances', event_id = event.id)}}">{{event.name}}</a> <span class="content-right" style="font-size:15px"> <a href="{{url_for('remove_event', event_id = event.id)}}"> REMOVE </a> </span></h1>
+                     {%elif hasattr(event, 'date_of_tournament')%}
+                     <h1 class="event-title"><a href="{{url_for('display_tournaments', event_id = event.id)}}">{{event.name}}</a> <span class="content-right" style="font-size:15px"> <a href="{{url_for('remove_event', event_id = event.id)}}"> REMOVE </a> </span></h1>
+                     {%endif%}  -->
                      <p class="event-desc"> 
                          {{event.description}}
                       </p>
