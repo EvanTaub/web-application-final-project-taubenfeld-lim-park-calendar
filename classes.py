@@ -219,10 +219,10 @@ def upload_csv_wednesday(csv_data, creator_id):
 def enter_event(user_id, event_id, param): #pass dictionary parameter as a string in the param
     current_event = Event.query.get(event_id)
     user = User.query.get(user_id)
-    if param == "Performances" or param == "Tournaments Spectating" or param == "Tournments Competing":
-        user.joined_events[param].append(current_event.name)  #all three dictionary parameters are treated as a list
-    elif param == "Project Wednesday":
+    if param == "Project Wednesday":
         user.joined_events[param] = f"{current_event.name}" #project wednesday treated as string
+    else:
+        user.joined_events[param].append(current_event.name)  #all three dictionary parameters are treated as a list
     if param == "Tournaments Competing":
         current_event.participants["Competitors"].append(user_id)
     else:
@@ -249,4 +249,3 @@ def leave_event(user_id, event_id, param):
     flag_modified(user,'joined_events')
     db.session.commit()
     return
-    

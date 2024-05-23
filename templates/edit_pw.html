@@ -71,39 +71,11 @@
     </div>
 
     <!-- Sign Up Button -->
-    {%if user != ''%}
-        {%if user.joined_events["Project Wednesday"] != ''%}
-            <form method="POST">
-                <div class="mt-2 text-center">
-                    <button type="submit" class="btn btn-secondary-emphasis profile-button" name="join_button_spectator" disabled>Sign Up</button>
-                </div>
-            </form>
-            {%if user.joined_events["Project Wednesday"] == event.name%}
-            <form method="POST">
-                <div class="mt-2 text-center">
-                    <button type="submit" class="btn btn-danger profile-button" name="leave_event">Leave Event</button>
-                </div>
-            </form>
-            {%endif%}
-        {%else%}
-        <form method="POST">
-            <div class="mt-5 text-center">
-                <button type="submit" class="btn btn-primary profile-button" name="join_button">Sign Up</button>
-            </div>
-        </form>
-        {%endif%}
-    {%else%}
     <form method="POST">
-        <div class="mt-2 text-center">
-            <button type="submit" class="btn btn-secondary-emphasis profile-button" name="join_button" disabled>Sign Up</button>
+        <div class="mt-5 text-center">
+            <button type="submit" class="btn btn-primary profile-button" name="join_button">Sign Up</button>
         </div>
     </form>
-    {%endif%}
-
-
-
-
-    
 </div>
 {% endblock %}
 

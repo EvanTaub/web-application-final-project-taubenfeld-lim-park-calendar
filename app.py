@@ -332,8 +332,18 @@ def display_pw():
                         flash("You have successfully joined the project!", "success")
                 else:
                     flash("You must be logged in to make this action!", "danger")
-
-        return render_template('view_pw.html', event=project_wednesday)
+            if 'leave_event' in request.form:
+                if 'id' in session:
+                    if current_user.joined_events["Project Wednesday"] == "":
+                        flash("You have not joined this project!", 'warning')
+                        return redirect(url_for('event'))
+                    else:
+                        leave_event(current_user.id, project_wednesday.id, "Project Wednesday")
+                        flash('You have successfully left this event', 'success')
+        
+        if 'id' in session:
+            return render_template('view_pw.html', event = project_wednesday, user= current_user)
+        return render_template('view_pw.html', event=project_wednesday, user = '')
 
     events = ProjectWednesday.query.all()
     return render_template('project_wednesdays.html', events=events)
@@ -496,7 +506,7 @@ def process_project_data():
         cycle_num = request.form['cycle']
         if request.form['cost'] != '':
             cost = request.form['cost']
-        new_tournament = Tournaments(
+        new_pw = ProjectWednesday(
             creator_id = current_user.id,
             name = name,
             description = description,
@@ -507,10 +517,10 @@ def process_project_data():
             special_note = special_note,
         )
         
-        db.session.add(new_tournament)
+        db.session.add(new_pw)
         db.session.commit()
         
-        flash('Tournament added successfully!', 'success')
+        flash('Project added successfully!', 'success')
 
 def process_performance_data():
         name = request.form['event_title']
@@ -578,7 +588,6 @@ def add_projects():
             return redirect(url_for('add_projects'))
         
         elif 'cycle_submit' in request.form:
-            event_description = request.form['event_description']
             cycle_number = request.form['cycle']
             csv_file = request.files['csv_file']
             
@@ -614,7 +623,27 @@ def add_tournaments():
 @app.route("/edit")
 # @login_required
 def edit():
-    return render_template("edit_event.html")
+    events = Event.query.filter_by(creator_id=current_user.id)
+    return render_template("edit_event.html", events=events)
+
+@app.route('/edit/performance')
+def edit_performance():
+    pass
+
+@app.route('/remove_event')
+def remove_event():
+    event_id = request.args.get('event_id')
+    print(event_id)
+    event = Event.query.get(int(event_id))
+    print(event)
+    try:
+        db.session.delete(event)
+        db.session.commit()
+        flash('Event removed successfully!', 'success')
+    except:
+        db.session.rollback()
+        flash('There was an issue removing the event. Please try again.', 'warning')
+    return redirect(url_for('index'))
 
 @app.route('/verify_email')
 def email_verification():
@@ -763,7 +792,6 @@ def view_user_profile(user_id):
     return render_template('profile.html', user=user, event=p_wed, tournaments_c=tournaments_c, tournaments_s=tournaments_s)
 
         
-
 
 
                  
