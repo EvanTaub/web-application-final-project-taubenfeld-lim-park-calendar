@@ -36,7 +36,7 @@ def load_joined_users():
     return default_events
 
 class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
     email = db.Column(db.String(255), unique=True, nullable=False)
@@ -97,7 +97,7 @@ class Event(db.Model, UserMixin):
 
 
 class ProjectWednesday(Event):
-    id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True)
+    id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True, autoincrement=True)
     cycle_number = db.Column(db.Integer, default=1, nullable=False)
     cost = db.Column(db.String(50), default = '0', nullable = True)
     teachers = db.Column(db.String(100), default = '', nullable = False)

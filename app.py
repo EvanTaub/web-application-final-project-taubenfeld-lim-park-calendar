@@ -75,6 +75,7 @@ with app.app_context():
 def generate_token():
     return secrets.token_urlsafe(50)  
 
+
 ####### PAGINATION EXAMPLE on back end!!!!!!!!! #######
 #  if request.method=='GET':
 #         per_page = 5
@@ -85,6 +86,7 @@ def generate_token():
 #         pagination = Pagination(page=page, total=Book.query.count(), record_name='items',per_page=per_page)
 #         books = Book.query.paginate(page=page,per_page=per_page)
 #         return render_template("inventory.html", books = books, pagination=pagination)
+
 
 
 @app.route('/google/')
@@ -201,7 +203,14 @@ def index():
 def test():
     return render_template("test.html")
 
+# # Define the custom function
+# def is_instance_of(obj, cls):
+#     return isinstance(obj, cls)
 
+# # Register the custom function as a template global
+# @app.context_processor
+# def utility_processor():
+#     return dict(is_instance_of=is_instance_of)
 
 
 @app.route("/register", methods = ["GET","POST"])
@@ -546,11 +555,16 @@ def process_performance_data():
             date_of_performance = date,
             cost_audience = cost_audience
         )
+        try:
+
+            db.session.add(new_performance)
+            db.session.commit()
+            flash('Performance added successfully!', 'success')
+        except:
+            db.session.rollback()
+            flash('Error Adding Performance. Please Try Again!', 'warning')
         
-        db.session.add(new_performance)
-        db.session.commit()
         
-        flash('Performance added successfully!', 'success')
 
 
 @app.route("/add/performances", methods=['GET', 'POST'])
@@ -658,34 +672,7 @@ def profile():
         tournaments_s = [tournament for tournament in Tournaments.query.all() if user.id in tournament.participants["Joined Users"]]
         tournaments_c = [tournament for tournament in Tournaments.query.all() if user.id in tournament.participants["Competitors"]]
         return render_template('profile.html', user=user, event=p_wed, tournaments_c=tournaments_c, tournaments_s=tournaments_s)
-    
-    if request.method == "POST":
-        if 'profile_submit' in request.form:
-            first_name = request.form.get('newfirstname')
-            last_name = request.form.get('newlastname')
-            email = request.form.get('newemail')
-            
-            if first_name:
-                user.first_name = first_name
-            if last_name:
-                user.last_name = last_name
-            if email:
-                user.email = email
-            db.session.commit()
-            flash("Profile Information Edited Successfully!", "success")
-            return redirect(url_for('profile'))
-        
-        elif "password_submit" in request.form:
-            new_password = request.form.get("newpass")
-            old_password = request.form.get('oldpass')
-            if user and user.check_password(old_password):
-                user.set_password(new_password)
-                db.session.commit()
-                flash("Password Successfully Changed!", 'success')
-                return redirect(url_for('profile'))
-            else:
-                flash('Incorrect Password!', 'danger')
-                return redirect(url_for('profile'))
+    return render_template('profile.html', user=user, event=p_wed, tournaments_c=tournaments_c, tournaments_s=tournaments_s)
 
 
 
