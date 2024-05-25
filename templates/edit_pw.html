@@ -3,12 +3,14 @@
 {% set active_page = 'events' %}
 {% block content %}
 <div class="container rounded bg-white mt-5 mb-5">
+    <input type="number" class="form-control" id="floatingInput" value="{{event.id}}" name='event_id' style="display:hidden"
+    readonly>
     <!-- Display project details -->
     <div class="row mt-2">
         <div class="col"></div>
         <div class="col-md-4" style="justify-content:center;">
             <label class="labels">Project Title</label>
-            <input type="text" name="name" class="form-control" placeholder="Project Title" value="{{ event.name }}" readonly>
+            <input type="text" name="name" class="form-control" placeholder="Project Title" value="{{ event.name }}">
         </div>
         <div class="col"></div>
     </div>
@@ -17,7 +19,7 @@
         <div class="col"></div>
         <div class="col-md-8" style="align-items:center">
             <label class="labels">Project Description</label>
-            <textarea name="project_description" class="form-control" rows='6' cols='100' maxlength='500' placeholder="Description (1500 character limit)" readonly>{{ event.description }}</textarea>
+            <textarea name="project_description" class="form-control" rows='6' cols='100' maxlength='500' placeholder="Description (1500 character limit)">{{ event.description }}</textarea>
         </div>
         <div class="col"></div>
     </div>
@@ -26,7 +28,7 @@
         <div class="col"></div>
         <div class="col-md-4" style="justify-content:center;">
             <label class="labels">Student Limit</label>
-            <input type="number" name="student_limit" class="form-control" placeholder="0" value="{{ event.student_limit }}" readonly>
+            <input type="number" name="student_limit" class="form-control" placeholder="0" value="{{ event.student_limit }}">
         </div>
         <div class="col"></div>
     </div>
@@ -35,7 +37,7 @@
         <div class="col"></div>
         <div class="col-md-4" style="justify-content:center;">
             <label class="labels">Teachers</label>
-            <input type="text" name="teachers" class="form-control" placeholder="Teachers" value="{{ event.teachers }}" readonly>
+            <input type="text" name="teachers" class="form-control" placeholder="Teachers" value="{{ event.teachers }}">
         </div>
         <div class="col"></div>
     </div>
@@ -44,7 +46,7 @@
         <div class="col"></div>
         <div class="col-md-4" style="justify-content:center;">
             <label class="labels">Student Assistant</label>
-            <input type="text" name="student_assistant" class="form-control" placeholder="Student Assistant" value="{{ event.student_assistant }}" readonly>
+            <input type="text" name="student_assistant" class="form-control" placeholder="Student Assistant" value="{{ event.student_assistant }}">
         </div>
         <div class="col"></div>
     </div>
@@ -53,7 +55,7 @@
         <div class="col"></div>
         <div class="col-md-4" style="justify-content:center;">
             <label class="labels">Special Notes</label>
-            <input type="text" name="special_note" class="form-control" placeholder="Special Notes" value="{{ event.special_note }}" readonly>
+            <input type="text" name="special_note" class="form-control" placeholder="Special Notes" value="{{ event.special_note }}">
         </div>
         <div class="col"></div>
     </div>
@@ -70,10 +72,10 @@
         <div class="col"></div>
     </div>
 
-    <!-- Sign Up Button -->
-    <form method="POST">
+    <!-- Edit Event Button -->
+    <form method="POST" action="/edit/pw">
         <div class="mt-5 text-center">
-            <button type="submit" class="btn btn-primary profile-button" name="join_button">Sign Up</button>
+            <button type="submit" class="btn btn-primary profile-button" name="edit_button">Edit Event</button>
         </div>
     </form>
 </div>

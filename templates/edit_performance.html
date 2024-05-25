@@ -4,6 +4,9 @@
 {% block content %}
 <div class="container rounded bg-white mt-5 mb-5">
     <!-- Display performance details -->
+    <input type="number" class="form-control" id="floatingInput" value="{{event.id}}" name='event_id' style="display:hidden"
+    readonly>
+
     <div class="row mt-2">
         <div class="col"></div>
         <div class="col-md-4" style="justify-content:center;">

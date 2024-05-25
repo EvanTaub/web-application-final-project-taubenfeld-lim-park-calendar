@@ -10,7 +10,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import csv, io
 from extensions import db  
 from datetime import datetime
-
+from jinja2 import Environment, FileSystemLoader
 
 # app = Flask(__name__)
 # app.secret_key ='soujgpoisefpowigmppwoigvhw0wefwefwogihj'
@@ -35,7 +35,8 @@ def load_joined_users():
         default_events = json.load(file)
     return default_events
 
-class User(db.Model, UserMixin):
+class UserBase(db.Model, UserMixin):
+    __abstract__ = True
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
@@ -59,18 +60,12 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f"ID: {self.id}\nFirst Name: {self.first_name}\nLast Name: {self.last_name}\nEmail: {self.email}\n Account Type {self.__class__.__name__}"
 
-    def create_event(self, **kwargs):
-        if not isinstance(self, Teacher):
-            raise PermissionError("Only teachers and admins can create events.")
-        pass
-        # event = Event(**kwargs, creator=self)
-        # db.session.add(event)
-        # db.session.commit()
-        return # eventP
+class User(UserBase):
+    __tablename__ = 'users'
 
 class Teacher(User):
     __tablename__ = 'teacher'
-    id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     events_created = db.Column(JSON, default = load_create_default)
 
 class Admin(Teacher):
@@ -83,7 +78,7 @@ class SuperAdmin(Admin):
 
 class Event(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     name = db.Column(db.String(255), nullable=False, default='null')
     description = db.Column(db.Text, nullable=False, default='null')
     image = db.Column(db.LargeBinary, nullable=True)  # Allow image to be None
@@ -249,3 +244,11 @@ def leave_event(user_id, event_id, param):
     flag_modified(user,'joined_events')
     db.session.commit()
     return
+
+
+def is_instance_of(user, class_name):
+    cls = globals().get(class_name)
+    if cls and isinstance(user,cls):
+        return True
+    return False
+

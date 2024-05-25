@@ -3,6 +3,8 @@
 {% set active_page = 'events' %}
 {% block content %}
 <div class="container rounded bg-white mt-5 mb-5">
+    <input type="number" class="form-control" id="floatingInput" value="{{event.id}}" name='event_id' style="display:hidden"
+    readonly>
     <!-- Display performance details -->
     <div class="row mt-2">
         <div class="col"></div>
@@ -58,7 +60,7 @@
     </div>
 
    <!-- Edit Event Button -->
-   <form method="POST">
+   <form method="POST" action="/edit/tournament">
     <div class="mt-5 text-center">
         <button type="submit" class="btn btn-primary profile-button" name="edit_button">Edit Event</button>
     </div>

@@ -37,9 +37,29 @@
                     {% else %}
                         <p>No competing tournaments</p>
                     {% endif %}
+                    <div class="col-md-12">
+                        <h3>Performances</h3>
+                        {% if performances%}
+                            {% for performance in performances %}
+                                <h4><a href="{{ url_for('display_performance', event_id=performance.id) }}">{{ performance.name }}</a></h4>
+                            {% endfor %}
+                        {% else %}
+                            <p>No competing tournaments</p>
+                        {% endif %}
+                    </div>
                 </div>
+               
+            
+                <div class="">Created Events</div>
+                <div class="">
+                    <h3></h3>
+                </div>
+
+                
+
             </div>
         </div>
+    </div>
         
         <!-- Right side for read-only profile information -->
         <div class="col-md-7">

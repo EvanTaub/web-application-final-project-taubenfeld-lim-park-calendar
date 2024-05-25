@@ -20,6 +20,7 @@ from flask_paginate import Pagination
 from datetime import datetime
 from sqlalchemy.orm.attributes import flag_modified
 import random
+from jinja2 import Environment, FileSystemLoader
 # twilio test
 
 
@@ -27,7 +28,7 @@ from twilio.rest import Client
 
 from database import login_manager
 from account_management import login_management, logout_main, register_main, load_user_main
-from classes import User, SuperAdmin, Admin, Teacher, ProjectWednesday, Event, Tournaments,Performances, parse_csv_data, upload_csv_tournaments, upload_csv_wednesday, enter_event, leave_event
+from classes import User, SuperAdmin, Admin, Teacher, ProjectWednesday, Event, Tournaments,Performances, parse_csv_data, upload_csv_tournaments, upload_csv_wednesday, enter_event, leave_event, is_instance_of
 #import from classes these old functions? -> join_project_wednesday, attend_performance, enter_tournament_compete, enter_tournament_spectate,
 
 from extensions import db, login_manager  # Adjust the import path as necessary
@@ -59,7 +60,8 @@ oauth.register(
     }
 )
 
-
+env = Environment(loader=FileSystemLoader('templates'))
+env.filters['is_instance_of'] = is_instance_of
 
 with app.app_context():
     db.create_all()
@@ -292,15 +294,15 @@ def event():
             flash('Events Successfully Added!', 'success')
             return redirect(url_for('event'))
         if "tournament_submit" in request.form:
-            process_tournament_data()
+            process_tournament_data('add',None)
             # flash('Events Successfully Added!', 'success')
             return redirect(url_for('event'))
         if "performance_submit" in request.form:
-            process_performance_data()
+            process_performance_data('add',None)
             return redirect(url_for('event'))
         
         if "project_submit" in request.form:
-            process_project_data()
+            process_project_data('add',None)
             return redirect(url_for('event'))
 
 
@@ -473,7 +475,7 @@ def add():
 #IMAGE PROCESSING WITH PERFORMANCE MUST BE DONE.
 
 
-def process_tournament_data():
+def process_tournament_data(param, event):
         name = request.form['event_title']
         description = request.form['event_description']
         datetime_data = request.form['date_of_tournament']
@@ -487,25 +489,45 @@ def process_tournament_data():
             image_data_b64 = base64.b64encode(event_pic_data).decode('utf-8')
         cost_competitor = request.form['cost_competitor']
         cost_spectator = request.form['cost_spectator']
+        if param == 'add':
+            new_tournament = Tournaments(
+                creator_id = current_user.id,
+                name = name,
+                description = description,
+                student_limit = student_limit,
+                image = event_pic_data,
+                image_b64 = image_data_b64,
+                date_of_tournament = date,
+                cost_competitor = cost_competitor,
+                cost_spectator = cost_spectator,
+            )
+            try:
+                db.session.add(new_tournament)
+                db.session.commit()
+                flash('Tournament added successfully!', 'success')
+            except:
+                db.session.rollback()
+                flash('Something went wrong trying to add the tournament in. Please try again.', 'danger')
+        elif param == 'edit':
+            try:
+                event.name = name
+                event.description = description
+                event.student_limit = student_limit
+                event.image = event_pic_data
+                event.image_b64 = image_data_b64
+                event.date_of_tournament = date
+                event.cost_competitor = cost_competitor
+                event.cost_spectator = cost_spectator
+                db.session.commit()
+                flash('Tournament edited successfully!', 'success')
+            except:
+                db.session.rollback()
+                flash('Something went wrong trying to edit the tournament information. Please try again.', 'danger')
+            
+            
+       
 
-        new_tournament = Tournaments(
-            creator_id = current_user.id,
-            name = name,
-            description = description,
-            student_limit = student_limit,
-            image = event_pic_data,
-            image_b64 = image_data_b64,
-            date_of_tournament = date,
-            cost_competitor = cost_competitor,
-            cost_spectator = cost_spectator,
-        )
-        
-        db.session.add(new_tournament)
-        db.session.commit()
-        
-        flash('Tournament added successfully!', 'success')
-
-def process_project_data():
+def process_project_data(param, event):
         name = request.form['name']
         description = request.form['project_description']
         student_limit = request.form['student_limit']
@@ -515,7 +537,8 @@ def process_project_data():
         cycle_num = request.form['cycle']
         if request.form['cost'] != '':
             cost = request.form['cost']
-        new_pw = ProjectWednesday(
+        if param == 'add':
+            new_pw = ProjectWednesday(
             creator_id = current_user.id,
             name = name,
             description = description,
@@ -524,14 +547,31 @@ def process_project_data():
             teachers = teachers,
             student_assistant = student_assistant,
             special_note = special_note,
-        )
-        
-        db.session.add(new_pw)
-        db.session.commit()
-        
-        flash('Project added successfully!', 'success')
+            )
+            try:
+                db.session.add(new_pw)
+                db.session.commit()
+                flash('Project added successfully!', 'success')
+            except:
+                db.session.rollback()
+                flash('There was an error adding the project. Please try again later!', 'danger')
+        elif param == 'edit':
+            event.name = name
+            event.description = description
+            event.student_limit = student_limit
+            event.cycle_number = cycle_num
+            event.teachers = teachers
+            event.student_assistant = student_assistant
+            event.special_note = special_note
+            try:
+                db.session.commit()
+                flash('Project added successfully!', 'success')
+            except:
+                db.session.rollback()
+                flash('There was an error editing the project data. Please try again later!', 'danger')
 
-def process_performance_data():
+        
+def process_performance_data(param, event):
         name = request.form['event_title']
         description = request.form['event_description']
         datetime_data = request.form['date_of_performance']
@@ -544,26 +584,38 @@ def process_performance_data():
             event_pic_data = event_pic_file.read()
             image_data_b64 = base64.b64encode(event_pic_data).decode('utf-8')
         cost_audience = request.form['cost_audience']
-
-        new_performance = Performances(
-            creator_id = current_user.id,
-            name = name,
-            description = description,
-            student_limit = student_limit,
-            image = event_pic_data,
-            image_b64 = image_data_b64,
-            date_of_performance = date,
-            cost_audience = cost_audience
-        )
-        try:
-
-            db.session.add(new_performance)
-            db.session.commit()
-            flash('Performance added successfully!', 'success')
-        except:
-            db.session.rollback()
-            flash('Error Adding Performance. Please Try Again!', 'warning')
-        
+        if param == 'add':
+            new_performance = Performances(
+                creator_id = current_user.id,
+                name = name,
+                description = description,
+                student_limit = student_limit,
+                image = event_pic_data,
+                image_b64 = image_data_b64,
+                date_of_performance = date,
+                cost_audience = cost_audience
+            )
+            try:
+                db.session.add(new_performance)
+                db.session.commit()
+                flash('Performance added successfully!', 'success')
+            except:
+                db.session.rollback()
+                flash('Error Adding Performance. Please Try Again!', 'warning')
+        elif param == 'edit':
+            event.name = name
+            event.description = description
+            event.student_limit = student_limit
+            event.image = event_pic_data
+            event.image_b64 = image_data_b64
+            event.date_of_performance = date
+            event.cost_audience = cost_audience
+            try:
+                db.session.commit()
+                flash('Performance edited successfully!', 'success')
+            except:
+                db.session.rollback()
+                flash('There was an error editing the performance data. Please Try Again!', 'warning')
         
 
 
@@ -637,12 +689,67 @@ def add_tournaments():
 @app.route("/edit")
 # @login_required
 def edit():
-    events = Event.query.filter_by(creator_id=current_user.id)
-    return render_template("edit_event.html", events=events)
+    events = Event.query.filter_by(creator_id=current_user.id).all()
+    if len(events) > 0:
+        tournaments = Tournaments.query.filter_by(creator_id = current_user.id).all()
+        performances = Performances.query.filter_by(creator_id = current_user.id).all()
+        pweds = ProjectWednesday.query.filter_by(creator_id = current_user.id).all()
+        return render_template("edit_event.html", events=events ,tournaments = tournaments, pweds = pweds, performances = performances) 
+    flash("You have no events to edit at this time!", 'warning')
+    return redirect(url_for('index'))
 
-@app.route('/edit/performance')
+@app.route('/edit/performance', methods=['GET', 'POST'])
 def edit_performance():
-    pass
+    if "event_id" in request.args:
+        event_id = request.args.get("event_id")
+        event = Performances.query.get(int(event_id))
+        event_date = event.date_of_performance.strftime('%Y-%m-%dT%H:%M')
+        if request.method == 'POST':
+            id = request.form['event_id']
+            event = Performances.query.get(int(id))
+            process_performance_data('edit',event)
+            return redirect(url_for('edit'))
+    return render_template('edit_performance.html',event=event,event_date=event_date)
+
+@app.route('/edit/tournament', methods=['GET', 'POST'])
+def edit_tournament():
+    if request.method == "GET":
+    # if "event_id" in request.args:
+        event_id = request.args.get("event_id")
+        event = Tournaments.query.get(int(event_id))
+        event_date = event.date_of_tournament.strftime('%Y-%m-%dT%H:%M')
+        return render_template('edit_tournament.html',event=event, event_date=event_date)
+    if request.method == 'POST':
+            id = request.form['event_id']
+            event = Tournaments.query.get(int(id))
+            process_tournament_data('edit',event)
+            return redirect(url_for('edit'))
+
+@app.route('/edit/project_wednesday', methods=['GET', 'POST'])
+def edit_project_wednesday():
+    if "event_id" in request.args:
+        event_id = request.args.get("event_id")
+        event = ProjectWednesday.query.get(int(event_id))
+        if request.method == 'POST':
+            id = request.form['event_id']
+            event = ProjectWednesday.query.get(int(id))
+            process_project_data('edit',event)
+            return redirect(url_for('edit'))
+    return render_template('edit_pw.html',event=event)
+
+
+#   if isinstance(event, Tournaments):
+#             if request.method == "POST":
+#                 pass
+#             return render_template('edit_tournament.html',event=event)
+#         elif isinstance(event, ProjectWednesday):
+#             if request.method == "POST":
+#                 pass
+#             return render_template('edit_pw.html',event=event)
+#         elif isinstance(event, Performances):
+#             if request.method == "POST":
+#                 pass
+#             return render_template('edit_performance.html',event=event)
 
 @app.route('/remove_event')
 def remove_event():
@@ -671,8 +778,9 @@ def profile():
         p_wed = Event.query.filter_by(name=user.joined_events.get("Project Wednesday")).first()
         tournaments_s = [tournament for tournament in Tournaments.query.all() if user.id in tournament.participants["Joined Users"]]
         tournaments_c = [tournament for tournament in Tournaments.query.all() if user.id in tournament.participants["Competitors"]]
-        return render_template('profile.html', user=user, event=p_wed, tournaments_c=tournaments_c, tournaments_s=tournaments_s)
-    return render_template('profile.html', user=user, event=p_wed, tournaments_c=tournaments_c, tournaments_s=tournaments_s)
+        performances = [performance for performance in Performances.query.all() if user.id in performance.participants['Joined Users']]
+        return render_template('profile.html', user=user, event=p_wed, tournaments_c=tournaments_c, tournaments_s=tournaments_s, performances = performances)
+    return render_template('profile.html', user=user, event=p_wed, tournaments_c=tournaments_c, tournaments_s=tournaments_s, performances = performances)
 
 
 
@@ -683,16 +791,7 @@ def profile():
 @login_required
 def promote():
     current_user_obj = User.query.get(int(session['id']))  # Retrieve the current user by ID
-    users = User.query.all() 
-    # Access control based on account type
-    # if current_user_obj.account_type == 'Admin':
-    #     # Retrieve all users except SuperAdmins and other Admins
-    #     users = User.query.filter(User.account_type != 'SuperAdmin', User.account_type != 'Admin').all()
-    # elif current_user_obj.account_type == 'SuperAdmin':
-    #     users = User.query.all()  # SuperAdmins can see all users
-    # else:
-    #     flash('Unauthorized Access!', 'danger')
-    #     return redirect(url_for('index'))
+    users = User.query.all()
 
     if request.method == 'GET':
         return render_template('promote.html', users=users)  # Pass users to the template
@@ -706,12 +805,58 @@ def promote():
 
             if user_to_promote:
                 # Check if the promotion is allowed
-                if (current_user_obj.account_type == 'Admin' and user_to_promote.account_type in ['Admin', 'SuperAdmin']):
-                    flash("Admins can't modify Admins or SuperAdmins.", 'danger')
-                elif (current_user_obj.account_type == 'SuperAdmin' and user_to_promote.account_type == 'SuperAdmin'):
-                    flash("SuperAdmins can't modify SuperAdmins.", 'danger')
-                else:
-                    user_to_promote.account_type = new_role  # Assign the new role
+                # if (current_user_obj.account_type == 'Admin' and user_to_promote.account_type in ['Admin', 'SuperAdmin']):
+                #     flash("Admins can't modify Admins or SuperAdmins.", 'danger')
+                # elif (current_user_obj.account_type == 'SuperAdmin' and user_to_promote.account_type == 'SuperAdmin'):
+                #     flash("SuperAdmins can't modify SuperAdmins.", 'danger')
+                # else:
+                    # Delete the current user role object
+                    db.session.delete(user_to_promote)
+                    db.session.commit()
+
+                    # Create a new user object with the new role
+                    if new_role == 'SuperAdmin':
+                        new_user = SuperAdmin(
+                            id = user_to_promote.id,
+                            first_name=user_to_promote.first_name,
+                            last_name=user_to_promote.last_name,
+                            email=user_to_promote.email,
+                            password_hash=user_to_promote.password_hash,
+                            phone_number=user_to_promote.phone_number,
+                            account_type='SuperAdmin'
+                        )
+                    elif new_role == 'Admin':
+                        new_user = Admin(
+                            id = user_to_promote.id,
+                            first_name=user_to_promote.first_name,
+                            last_name=user_to_promote.last_name,
+                            email=user_to_promote.email,
+                            password_hash=user_to_promote.password_hash,
+                            phone_number=user_to_promote.phone_number,
+                            account_type='Admin'
+                        )
+                    elif new_role == 'Teacher':
+                        new_user = Teacher(
+                            id = user_to_promote.id,
+                            first_name=user_to_promote.first_name,
+                            last_name=user_to_promote.last_name,
+                            email=user_to_promote.email,
+                            password_hash=user_to_promote.password_hash,
+                            phone_number=user_to_promote.phone_number,
+                            account_type='Teacher'
+                        )
+                    else:
+                        new_user = User(
+                            id = user_to_promote.id,
+                            first_name=user_to_promote.first_name,
+                            last_name=user_to_promote.last_name,
+                            email=user_to_promote.email,
+                            password_hash=user_to_promote.password_hash,
+                            phone_number=user_to_promote.phone_number,
+                            account_type=new_role
+                        )
+
+                    db.session.add(new_user)
                     db.session.commit()  # Save changes
 
                     flash(f"User {user_to_promote.email} promoted to {new_role}", 'success')
@@ -721,6 +866,8 @@ def promote():
             flash("Invalid promotion request", 'danger')
 
         return redirect(url_for('promote'))
+
+
 
 
 
@@ -778,9 +925,12 @@ def view_user_profile(user_id):
     tournaments_c = [tournament for tournament in Tournaments.query.all() if user.id in tournament.participants["Competitors"]]
     return render_template('profile.html', user=user, event=p_wed, tournaments_c=tournaments_c, tournaments_s=tournaments_s)
 
-        
 
 
+#add to Jinja Frontend
+@app.template_filter()
+def is_instance_of_filter(user,class_name):
+    return is_instance_of(user,class_name)
                  
 
 
@@ -790,4 +940,4 @@ def view_user_profile(user_id):
 
 if __name__ == "__main__":
     app.secret_key = "super_secret_key"  # Change this to a random, secure key
-    app.run(port = 5500, debug=True)
+    app.run(port = 5000, debug=True)
