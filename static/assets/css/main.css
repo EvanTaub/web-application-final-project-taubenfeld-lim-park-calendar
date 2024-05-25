@@ -465,3 +465,12 @@ iframe {
     opacity: 1;
   }
 }
+.google-button {
+  background-image: url('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 92px; /* Adjust width and height as needed */
+  height: 30px;
+  border: none;
+  cursor: pointer;
+}

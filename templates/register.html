@@ -42,20 +42,28 @@
 <body>
 
 	
-	
+
 	<div class="limiter">
 		<div class="container-login100">
+		
 			<div class="wrap-login100">
 				<div class="login100-pic js-tilt" data-tilt>
 					<img src="static/assets/img/bt logo.png" alt="IMG">
 				</div>
-
+			
 				
+			
+				<span class="login100-form-title">
+					Register with Google
+				</span>
 
-				<form action = "/register" method = "POST" class="login100-form validate-form">
-					<span class="login100-form-title">
-						Register
-					</span>
+				<a href="{{ url_for('google', session_page='register') }}" class="google-button"></a>
+			</div>
+		</div>
+	</div>
+	</div>
+
+				<!-- <form action = "/register" method = "POST" class="login100-form validate-form">
 
 					<div class="wrap-input100 validate-input" data-validate = "First Name is required">
 						<input class="input100" type="text" name="first-name" placeholder="First Name">
@@ -109,7 +117,8 @@
 				</form>
 			</div>
 		</div>
-	</div>
+	</div> -->
+	
 	
 	
 

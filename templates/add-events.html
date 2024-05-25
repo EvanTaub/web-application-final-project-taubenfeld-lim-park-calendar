@@ -1,71 +1,44 @@
-{%extends "base.html"%}
-{%block title%} EVENTS {%endblock%}
-{%set active_page='events'%}
-{%block content%} 
+{% extends "base.html"%}
+{%block title%}ADD EVENTS{%endblock%}
+{%set active_page = 'events'%}
+{%block content%}
+<div class="container rounded bg-white mt-5 mb-5">
 
-<form method="POST" action="/events">
-    <div class="container justify-content-center ">
-        <div class="row">
-           <div class="col mt-3 py-2">
-              <h1 class="display-4">Register an upcoming event! </h1>
-              <!-- {%if msg != ''%}
-              <div class="alert alert-success alert-dismissible fade show" role="alert">
-                 <strong>{{msg}}</strong>
-                 <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
-              </div>
-              {%endif%} -->
-           </div>
-        </div>
-        <div class="row ">
-           <div class="col-3 bg-light mt-3 py-2">
-              <div class="form-floating mb-3 d-flex justify-content-center">
-                 <input type="text" class="form-control" id="floatingInput" placeholder="Event Title" name='event_title'
-                    required>
-                 <label for="floatingInput"></label>
-              </div>
-              <div class="form-floating mb-3 d-flex justify-content-center">
-                 <select class="form-select" aria-label="Default select example" name='event_type'>
-                    <option disabled>Event Type</option>
-                    <option value="Project Wednesday">Project Wednesday</option>
-                    <option value="Workshops">Workshops</option>
-                    <option value="Tournaments">Tournaments</option>
-                    <option value="Performances">Performances</option>
-                 </select>
-                 <label for="floatingInput"></label>
-              </div>
-              <!-- Make two options for date (a physical manual description vs. a set date time) -->
-              <div class="event-date-classification">
-                  <div class="form-floating mb-3 d-flex justify-content-center">
-                     <input type="radio" class="form-control"
-              <!-- <div class="form-floating mb-3 d-flex justify-content-center date-description">
-                 <input type="date" class="form-control" id="floatingInput" placeholder="Event Date" name='event_date'
-                    required>
-                 <label for="floatingInput"></label>
-              </div> -->
-              <!-- <div class="form-floating mb-3 d-flex justify-content-center date-description-manual">
-               <input type="text" class="form-control" id="floatingInput" placeholder="Description (350 characters max)" name='event_description' maxlength="350">
-               <label for="floatingInput"></label>
-               </div> -->
+        <div class="border-right">
+            <div class="p-3 py-5">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="text-right">Form Title</h4>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data" action='/events'>
+                    <div class="row mt-2">
+                        <div class="col"></div>
+                        <div class="col-md-4" style="justify-content:center;"><label class="labels">Event Title</label> <input type="text" name="event_title" class="form-control" placeholder="My Fabulous Event!" value=""> </div>
+                        <div class="col"></div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col"></div>
+                        <div class="col-md-8" style="align-items:center"><label class="labels">Event Description</label><textarea name="event_description" class="form-control" value="" rows='6' cols='100' maxlength='500' placeholder="Description (1500 character limit)"> </textarea> </div>
+                        <div class="col"></div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col"></div>
+                        <div class="col-md-3"> <input type="file" class="form-control update-button" name="event_pic" accept=".jpg, .png" aria-describedby="basic-addon1" required> </div>
+                        <div class="col"></div>
+                    </div>
+
+                    
+
+
+                <span></span>
+                <div class="mt-5 text-center"><button type="submit" class="btn btn-primary profile-button" name='event_submit'>Add Event</button></div>
+                </form>
+
             </div>
-
-              <div class="form-floating mb-3 d-flex justify-content-center">
-                 <input type="text" class="form-control" id="floatingInput" placeholder="Description (350 characters max)" name='event_description' maxlength="350">
-                 <label for="floatingInput"></label>
-              </div>
-  
-              <div class="d-grid gap-2 col-8 mx-auto my-auto">
-                 <button type="submit" class="btn btn-secondary btn-lg" name="add_event">ADD EVENT</button>
-              </div>
-           </div>
-  
-           <div class="col-8 mt-3 py-2 text-center">
-              <img src="static\assets\img\bt logo.png" alt="">
-           </div>
         </div>
-     </div><!-- insert code here at a later time -->
-    
-</form>
+        
 
+</div>
 {%endblock%}
-{%block main_css%}<link href="static/assets/css/style.css" rel="stylesheet">{%endblock%}
 
+{%block main_css%} <link href="{{ url_for('static', filename='assets/css/style.css') }}" rel="stylesheet"> {%endblock%}

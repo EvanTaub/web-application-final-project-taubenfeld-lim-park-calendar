@@ -66,7 +66,7 @@
           {%endif%}
           <li><a href="/newsletter" class = "{{'active' if active_page == 'newsletter'}}">School Newsletter</a></li>
           {%if current_user.is_authenticated%}
-          <li><a href="{{url_for('profile')}}" class = "{{'active' if active_page == 'profile'}}">Profile</a></li> <!-- if user is logged in-->
+          <li><a href="/profile" class = "{{'active' if active_page == 'profile'}}">Profile</a></li> <!-- if user is logged in-->
           <li><a href="/logout" class = "{{'active' if active_page == 'logout'}}" >Logout</a></li> <!-- if user is logged in-->
           {%else%} 
           <li><a href="/register" class = "{{'active' if active_page == 'register'}}" >Register</a></li> <!-- if user is not logged in-->
