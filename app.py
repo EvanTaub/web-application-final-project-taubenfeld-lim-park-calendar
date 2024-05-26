@@ -481,12 +481,16 @@ def process_tournament_data(param, event):
         datetime_data = request.form['date_of_tournament']
         date = datetime.strptime(datetime_data, '%Y-%m-%dT%H:%M')
         student_limit = request.form['student_limit']
-        if 'event_pic' not in request.files:
-            event_pic_data = ''
-        else:
+        if 'event_pic' in request.files and request.files['event_pic'].filename != '':
             event_pic_file = request.files['event_pic'] 
+            print(event_pic_file.filename)
+            # print('SOMETHIGN SUBMITTED!!!')
             event_pic_data = event_pic_file.read()
-            image_data_b64 = base64.b64encode(event_pic_data).decode('utf-8')
+            image_data_b64 = base64.b64encode(event_pic_data).decode('utf-8') 
+        else:
+            event_pic_data = ''
+            image_data_b64 = ''
+            # print('NOTHING SUBMITTED!!!')
         cost_competitor = request.form['cost_competitor']
         cost_spectator = request.form['cost_spectator']
         if param == 'add':
@@ -513,8 +517,10 @@ def process_tournament_data(param, event):
                 event.name = name
                 event.description = description
                 event.student_limit = student_limit
-                event.image = event_pic_data
-                event.image_b64 = image_data_b64
+                if event_pic_data != '':
+                    # print('SOMETHING SUBMITTED')
+                    event.image = event_pic_data
+                    event.image_b64 = image_data_b64
                 event.date_of_tournament = date
                 event.cost_competitor = cost_competitor
                 event.cost_spectator = cost_spectator
@@ -547,6 +553,7 @@ def process_project_data(param, event):
             teachers = teachers,
             student_assistant = student_assistant,
             special_note = special_note,
+            cost = cost,
             )
             try:
                 db.session.add(new_pw)
@@ -563,9 +570,10 @@ def process_project_data(param, event):
             event.teachers = teachers
             event.student_assistant = student_assistant
             event.special_note = special_note
+            event.cost = cost
             try:
                 db.session.commit()
-                flash('Project added successfully!', 'success')
+                flash('Project edited successfully!', 'success')
             except:
                 db.session.rollback()
                 flash('There was an error editing the project data. Please try again later!', 'danger')
@@ -577,13 +585,14 @@ def process_performance_data(param, event):
         datetime_data = request.form['date_of_performance']
         date = datetime.strptime(datetime_data, '%Y-%m-%dT%H:%M')
         student_limit = request.form['student_limit']
-        if 'event_pic' not in request.files:
+        if 'event_pic' in request.files and request.files['event_pic'].filename != '':
+            event_pic_file = request.files['event_pic'] 
+            print(event_pic_file.filename)
+            event_pic_data = event_pic_file.read()
+            image_data_b64 = base64.b64encode(event_pic_data).decode('utf-8') 
+        else:
             event_pic_data = ''
             image_data_b64 = ''
-        else:
-            event_pic_file = request.files['event_pic'] 
-            event_pic_data = event_pic_file.read()
-            image_data_b64 = base64.b64encode(event_pic_data).decode('utf-8')
         cost_audience = request.form['cost_audience']
         if param == 'add':
             new_performance = Performances(
@@ -607,8 +616,9 @@ def process_performance_data(param, event):
             event.name = name
             event.description = description
             event.student_limit = student_limit
-            event.image = event_pic_data
-            event.image_b64 = image_data_b64
+            if event_pic_data != '':
+                event.image = event_pic_data
+                event.image_b64 = image_data_b64
             event.date_of_performance = date
             event.cost_audience = cost_audience
             try:

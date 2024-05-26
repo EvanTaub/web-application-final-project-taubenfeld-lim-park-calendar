@@ -4,8 +4,8 @@
 {% block content %}
 <div class="container rounded bg-white mt-5 mb-5">
     <!-- Display performance details -->
-    <form method="POST" action="/edit/performance">
-    <input type="number" class="form-control" id="floatingInput" value="{{event.id}}" name='event_id' style="display:hidden"
+    <form method="POST" action="/edit/performance" enctype="multipart/form-data">
+    <input type="hidden" class="form-control" id="floatingInput" value="{{event.id}}" name='event_id'
     readonly>
 
     <div class="row mt-2">
@@ -23,6 +23,12 @@
             <label class="labels">Performance Description</label>
             <textarea name="event_description" class="form-control" rows='6' cols='100' maxlength='500' placeholder="Description (1500 character limit)">{{ event.description }}</textarea>
         </div>
+        <div class="col"></div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col"></div>
+        <div class="col-md-3"> <label class="labels"> Image for Tournament </label> <p style='font-size:12px'> *If nothing is submitted, the image will be kept the same.</p>  <input type="file" class="form-control update-button" name="event_pic" accept=".jpg, .png" aria-describedby="basic-addon1"> </div>
         <div class="col"></div>
     </div>
 

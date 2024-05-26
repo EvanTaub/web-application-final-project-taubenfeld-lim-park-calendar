@@ -57,7 +57,7 @@
   
   /* CSS for card content */
   .card-content {
-    padding-top: 240px; /* Adjust padding as needed */
+    padding-top: 125px; /* Adjust padding as needed */
     transition: padding-top 0.5s ease-in-out;
     padding-left: 10px;
     padding-right: 20px;
@@ -83,7 +83,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 85%;
+  height: 45%;
   transition: height 0.5s ease-in-out;
   background-size: contain;
   background-repeat: no-repeat;
@@ -121,6 +121,12 @@
    float: right;
  }
 
+ .icon-image {
+  max-height: 2em; /* Adjust the value to match the font size or desired height */
+  height: auto;
+  width: auto; /* This maintains the aspect ratio */
+  margin-left: 10px; /* Adjust spacing if needed */
+}
 </style>
 
 
@@ -143,17 +149,17 @@
                   <div class="card-content">
                     {%for performance in performances%}
                     {%if event.id == performance.id%}
-                    <h1 class="event-title"><a href="{{url_for('edit_performance', event_id = event.id)}}">{{event.name}}</a> <span class="content-right" style="font-size:15px"> <a href="{{url_for('remove_event', event_id = event.id)}}"> REMOVE </a> </span></h1>
+                    <h1 class="event-title"><a href="{{url_for('edit_performance', event_id = event.id)}}">{{event.name}}</a> <span class="content-right" style="font-size:15px"> <a href="{{url_for('edit_performance', event_id = event.id)}}"> <img src='static/assets/img/edit_icon.png' class='icon-image'> </a> <a href="{{url_for('remove_event', event_id = event.id)}}"> <img src='static/assets/img/remove_icon.png' class='icon-image'> </a> </span></h1>
                     {%endif%}
                     {%endfor%}
                     {%for tournament in tournaments%}
                     {%if event.id == tournament.id%}
-                    <h1 class="event-title"><a href="{{url_for('edit_tournament', event_id = event.id)}}">{{event.name}}</a> <span class="content-right" style="font-size:15px"> <a href="{{url_for('remove_event', event_id = event.id)}}"> REMOVE </a> </span></h1>
+                    <h1 class="event-title"><a href="{{url_for('edit_tournament', event_id = event.id)}}">{{event.name}}</a> <span class="content-right" style="font-size:15px"> <a href="{{url_for('edit_tournament', event_id = event.id)}}"> <img src='static/assets/img/edit_icon.png' class='icon-image'> </a> <a href="{{url_for('remove_event', event_id = event.id)}}"> <img src='static/assets/img/remove_icon.png' class='icon-image'>  </a> </span></h1>
                     {%endif%}
                     {%endfor%}
                     {%for pwed in pweds%}
                     {%if event.id == pwed.id%}
-                    <h1 class="event-title"><a href="{{url_for('edit_project_wednesday', event_id = event.id)}}">{{event.name}}</a> <span class="content-right" style="font-size:15px"> <a href="{{url_for('remove_event', event_id = event.id)}}"> REMOVE </a> </span></h1>
+                    <h1 class="event-title"><a href="{{url_for('edit_project_wednesday', event_id = event.id)}}">{{event.name}}</a> <span class="content-right" style="font-size:15px"> <a href="{{url_for('edit_project_wednesday', event_id = event.id)}}"> <img src='static/assets/img/edit_icon.png' class='icon-image'> </a> <a href="{{url_for('remove_event', event_id = event.id)}}"> <img src='static/assets/img/remove_icon.png' class='icon-image'>  </a> </span></h1>
                     {%endif%}
                     {%endfor%}
                      <p class="event-desc"> 
