@@ -579,6 +579,7 @@ def process_performance_data(param, event):
         student_limit = request.form['student_limit']
         if 'event_pic' not in request.files:
             event_pic_data = ''
+            image_data_b64 = ''
         else:
             event_pic_file = request.files['event_pic'] 
             event_pic_data = event_pic_file.read()
@@ -700,16 +701,18 @@ def edit():
 
 @app.route('/edit/performance', methods=['GET', 'POST'])
 def edit_performance():
-    if "event_id" in request.args:
+    if request.method == 'GET':
         event_id = request.args.get("event_id")
         event = Performances.query.get(int(event_id))
         event_date = event.date_of_performance.strftime('%Y-%m-%dT%H:%M')
-        if request.method == 'POST':
-            id = request.form['event_id']
-            event = Performances.query.get(int(id))
-            process_performance_data('edit',event)
-            return redirect(url_for('edit'))
-    return render_template('edit_performance.html',event=event,event_date=event_date)
+        return render_template('edit_performance.html',event=event,event_date=event_date)
+    if request.method == 'POST':
+        id = request.form.get('event_id')
+        event = Performances.query.get(int(id))
+        process_performance_data('edit',event)
+        return redirect(url_for('edit'))
+    return redirect(url_for('edit'))
+    
 
 @app.route('/edit/tournament', methods=['GET', 'POST'])
 def edit_tournament():
@@ -720,23 +723,26 @@ def edit_tournament():
         event_date = event.date_of_tournament.strftime('%Y-%m-%dT%H:%M')
         return render_template('edit_tournament.html',event=event, event_date=event_date)
     if request.method == 'POST':
-            id = request.form['event_id']
+            id = request.form.get('event_id')
+            print(id)
             event = Tournaments.query.get(int(id))
             process_tournament_data('edit',event)
             return redirect(url_for('edit'))
 
 @app.route('/edit/project_wednesday', methods=['GET', 'POST'])
 def edit_project_wednesday():
-    if "event_id" in request.args:
+    if request.method == "GET":
         event_id = request.args.get("event_id")
         event = ProjectWednesday.query.get(int(event_id))
-        if request.method == 'POST':
-            id = request.form['event_id']
-            event = ProjectWednesday.query.get(int(id))
-            process_project_data('edit',event)
-            return redirect(url_for('edit'))
-    return render_template('edit_pw.html',event=event)
-
+        return render_template('edit_pw.html',event=event)
+    if request.method == 'POST':
+        id = request.form.get('event_id')
+        print(id)
+        event = ProjectWednesday.query.get(int(id))
+        print(event)
+        process_project_data('edit',event)
+        return redirect(url_for('edit'))
+    
 
 #   if isinstance(event, Tournaments):
 #             if request.method == "POST":
@@ -792,7 +798,12 @@ def profile():
 def promote():
     current_user_obj = User.query.get(int(session['id']))  # Retrieve the current user by ID
     users = User.query.all()
-
+    role_map = {
+                        'SuperAdmin': SuperAdmin,
+                        'Admin': Admin,
+                        'Teacher': Teacher,
+                        'User': User
+                    }
     if request.method == 'GET':
         return render_template('promote.html', users=users)  # Pass users to the template
 
@@ -805,61 +816,69 @@ def promote():
 
             if user_to_promote:
                 # Check if the promotion is allowed
-                # if (current_user_obj.account_type == 'Admin' and user_to_promote.account_type in ['Admin', 'SuperAdmin']):
-                #     flash("Admins can't modify Admins or SuperAdmins.", 'danger')
-                # elif (current_user_obj.account_type == 'SuperAdmin' and user_to_promote.account_type == 'SuperAdmin'):
-                #     flash("SuperAdmins can't modify SuperAdmins.", 'danger')
-                # else:
+                if (current_user_obj.account_type == 'Admin' and user_to_promote.account_type in ['Admin', 'SuperAdmin']):
+                    flash("Admins can't modify Admins or SuperAdmins.", 'danger')
+                elif (current_user_obj.account_type == 'SuperAdmin' and user_to_promote.account_type == 'SuperAdmin'):
+                    flash("SuperAdmins can't modify SuperAdmins.", 'danger')
+                else:
+                    # Store current user data
+                    user_data = {
+                        'first_name': user_to_promote.first_name,
+                        'last_name': user_to_promote.last_name,
+                        'email': user_to_promote.email,
+                        'password_hash': user_to_promote.password_hash,
+                        'phone_number': user_to_promote.phone_number,
+                        'joined_events': user_to_promote.joined_events
+                    }
+                    
                     # Delete the current user role object
-                    db.session.delete(user_to_promote)
+                    
                     db.session.commit()
+                    # If the user is a teacher or admin, remove from the parent tables as well
+                    try:
+                        db.session.execute('DELETE FROM teacher WHERE id = :id', {'id': user_to_promote.id})
+                        db.session.commit()
+                    except:
+                        db.session.rollback()
+                    try:
+                        db.session.execute('DELETE FROM admin WHERE id = :id', {'id': user_to_promote.id})
+                        db.session.commit()
+                    except:
+                        db.session.rollback()
+                    try:
+                        db.session.execute('DELETE FROM superadmins WHERE id = :id', {'id': user_to_promote.id})
+                        db.session.commit()
+                    except:
+                        db.session.rollback()
+                    
+                    
 
-                    # Create a new user object with the new role
-                    if new_role == 'SuperAdmin':
-                        new_user = SuperAdmin(
-                            id = user_to_promote.id,
-                            first_name=user_to_promote.first_name,
-                            last_name=user_to_promote.last_name,
-                            email=user_to_promote.email,
-                            password_hash=user_to_promote.password_hash,
-                            phone_number=user_to_promote.phone_number,
-                            account_type='SuperAdmin'
-                        )
-                    elif new_role == 'Admin':
-                        new_user = Admin(
-                            id = user_to_promote.id,
-                            first_name=user_to_promote.first_name,
-                            last_name=user_to_promote.last_name,
-                            email=user_to_promote.email,
-                            password_hash=user_to_promote.password_hash,
-                            phone_number=user_to_promote.phone_number,
-                            account_type='Admin'
-                        )
-                    elif new_role == 'Teacher':
-                        new_user = Teacher(
-                            id = user_to_promote.id,
-                            first_name=user_to_promote.first_name,
-                            last_name=user_to_promote.last_name,
-                            email=user_to_promote.email,
-                            password_hash=user_to_promote.password_hash,
-                            phone_number=user_to_promote.phone_number,
-                            account_type='Teacher'
-                        )
+                    # Map the new role to the correct class
+                  
+
+                    NewRoleClass = role_map.get(new_role)
+
+                    if NewRoleClass:
+                        new_user = NewRoleClass(**user_data)
+                        user_to_promote.email = ''
+                        db.session.add(new_user)
+                        tournaments_c = [tournament for tournament in Tournaments.query.all() if user_to_promote.id in tournament.participants["Competitors"]]
+                        for tournament in tournaments_c:
+                            tournament.participants["Competitors"].pop(tournament.participants["Competitors"].index(user_to_promote.id))
+                            tournament.participants["Competitors"].append(new_user.id)
+                        events = [event for event in Event.query.all() if user_to_promote.id in event.participants["Joined Users"]]
+                        for event in events:
+                            event.participants["Joined Users"].pop(event.participants["Joined Users"].index(user_to_promote.id))
+                            event.participants["Joined Users"].append(new_user.id)
+                        db.session.delete(user_to_promote)
+
+                    #update the events the user has joined
+                        
+                        db.session.commit()  # Save changes
+
+                        flash(f"User {user_to_promote.email} promoted to {new_role}", 'success')
                     else:
-                        new_user = User(
-                            id = user_to_promote.id,
-                            first_name=user_to_promote.first_name,
-                            last_name=user_to_promote.last_name,
-                            email=user_to_promote.email,
-                            password_hash=user_to_promote.password_hash,
-                            phone_number=user_to_promote.phone_number,
-                            account_type=new_role
-                        )
-
-                    db.session.add(new_user)
-                    db.session.commit()  # Save changes
-
-                    flash(f"User {user_to_promote.email} promoted to {new_role}", 'success')
+                        flash("Invalid role specified", 'danger')
             else:
                 flash("User not found", 'danger')
         else:

@@ -4,6 +4,7 @@
 {% block content %}
 <div class="container rounded bg-white mt-5 mb-5">
     <!-- Display performance details -->
+    <form method="POST" action="/edit/performance">
     <input type="number" class="form-control" id="floatingInput" value="{{event.id}}" name='event_id' style="display:hidden"
     readonly>
 
@@ -11,7 +12,7 @@
         <div class="col"></div>
         <div class="col-md-4" style="justify-content:center;">
             <label class="labels">Performance Title</label>
-            <input type="text" name="name" class="form-control" placeholder="Performance Name" value="{{ event.name }}">
+            <input type="text" name="event_title" class="form-control" placeholder="Performance Name" value="{{ event.name }}">
         </div>
         <div class="col"></div>
     </div>
@@ -20,7 +21,7 @@
         <div class="col"></div>
         <div class="col-md-8" style="align-items:center">
             <label class="labels">Performance Description</label>
-            <textarea name="project_description" class="form-control" rows='6' cols='100' maxlength='500' placeholder="Description (1500 character limit)">{{ event.description }}</textarea>
+            <textarea name="event_description" class="form-control" rows='6' cols='100' maxlength='500' placeholder="Description (1500 character limit)">{{ event.description }}</textarea>
         </div>
         <div class="col"></div>
     </div>
@@ -51,7 +52,7 @@
     </div>
 
     <!-- Edit Event Button -->
-    <form method="POST" action="/edit/performance">
+    
         <div class="mt-5 text-center">
             <button type="submit" class="btn btn-primary profile-button" name="edit_button">Edit Event</button>
         </div>

@@ -48,7 +48,7 @@ class UserBase(db.Model, UserMixin):
     phone_number = db.Column(db.String(10), nullable=False, default='')
     account_type = db.Column(db.String(255), nullable=False, default="Student")
     joined_events = db.Column(JSON, default = load_default_events)
-    
+    events_created = db.Column(JSON, default = load_create_default)
 
 
     def set_password(self, password):
@@ -66,7 +66,7 @@ class User(UserBase):
 class Teacher(User):
     __tablename__ = 'teacher'
     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    events_created = db.Column(JSON, default = load_create_default)
+    
 
 class Admin(Teacher):
     __tablename__ = 'admin'
@@ -159,57 +159,6 @@ def upload_csv_wednesday(csv_data, creator_id):
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
-
-    
-# def join_project_wednesday(user_id, event_id):
-#     current_event = Event.query.get(event_id)
-#     user = User.query.get(user_id)
-#     current_event.participants["Joined Users"].append(user_id)
-#     user.joined_events["Project Wednesday"] = f"{current_event.name}"
-#     flag_modified(current_event,'participants')
-#     flag_modified(user,'joined_events')
-#     db.session.commit()
-#     return
-
-# def attend_performance(user_id, event_id): 
-#     current_event = Event.query.get(event_id)
-#     current_event.participants["Joined Users"].append(user_id)
-#     user = User.query.get(user_id)
-#     user.joined_events["Performance"] = f"{current_event.name}"
-#     flag_modified(current_event,'participants')
-#     flag_modified(user,'joined_events')
-#     db.session.commit()
-#     return
-
-# def enter_tournament_compete(user_id, event_id):
-#     current_event = Event.query.get(event_id)
-#     current_event.participants["Joined Users"].append(user_id)
-#     user = User.query.get(user_id)
-#     user.joined_events["Tournaments Competing"] = f"{current_event.name}"
-#     flag_modified(current_event,'participants')
-#     flag_modified(user,'joined_events')
-#     db.session.commit()
-#     return
-
-# def enter_tournament_spectate(user_id, event_id):
-#     current_event = Event.query.get(event_id)
-#     current_event.participants["Joined Users"].append(user_id)
-#     user = User.query.get(user_id)
-#     user.joined_events["Tournaments Spectating"] = f"{current_event.name}"
-#     flag_modified(current_event,'participants')
-#     flag_modified(user,'joined_events')
-#     db.session.commit()
-#     return
-
-# def join_performance(user_id, event_id):
-#     current_event = Event.query.get(event_id)
-#     user = User.query.get(user_id)
-#     user.joined_events["Performances"].append(current_event.name)
-#     current_event.participants["Joined Users"].append(user_id)
-#     flag_modified(current_event,'participants')
-#     flag_modified(user,'joined_events')
-#     db.session.commit()
-#     return
     
 def enter_event(user_id, event_id, param): #pass dictionary parameter as a string in the param
     current_event = Event.query.get(event_id)

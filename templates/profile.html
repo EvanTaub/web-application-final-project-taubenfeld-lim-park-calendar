@@ -41,7 +41,7 @@
                         <h3>Performances</h3>
                         {% if performances%}
                             {% for performance in performances %}
-                                <h4><a href="{{ url_for('display_performance', event_id=performance.id) }}">{{ performance.name }}</a></h4>
+                                <h4><a href="{{ url_for('display_performances', event_id=performance.id) }}">{{ performance.name }}</a></h4>
                             {% endfor %}
                         {% else %}
                             <p>No competing tournaments</p>
@@ -50,11 +50,6 @@
                 </div>
                
             
-                <div class="">Created Events</div>
-                <div class="">
-                    <h3></h3>
-                </div>
-
                 
 
             </div>
