@@ -177,7 +177,7 @@ iframe {
 }
 
 .wrap-login100 {
-  width: 960px;
+  /* width: 960px; */
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
@@ -189,7 +189,7 @@ iframe {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  padding: 177px 130px 33px 95px;
+  padding: 100px 75px 100px 75px;
 }
 
 /*------------------------------------------------------------------
@@ -202,7 +202,7 @@ iframe {
 
 .login100-pic img {
   max-width: 100%;
-  padding: 15px; /* MIGHT NOT WORK!! FIX!!! PADDING IN CONTAINER-LOGIN100*/
+  /* padding: 15px; MIGHT NOT WORK!! FIX!!! PADDING IN CONTAINER-LOGIN100 */
 }
 
 
@@ -469,8 +469,22 @@ iframe {
   background-image: url('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png');
   background-size: contain;
   background-repeat: no-repeat;
-  width: 92px; /* Adjust width and height as needed */
-  height: 30px;
+  width: 138px; /* Adjust width and height as needed */
+  height: 45px;
   border: none;
   cursor: pointer;
+  display: inline-block;
+  margin-top: 50px; 
+}
+
+.google-title {
+  font-size: 25px;
+  /* width: 100px; */
+}
+
+.google-container {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center;    /* Center vertically */
+    /* height: 100vh;          Set height to 100% of the viewport height */
 }

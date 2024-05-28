@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Admin - User List{% endblock %}
+{% set active_page = 'admin' %}
 {% block content %}
 <div class="container mt-5">
     <h2>All Users</h2>
@@ -29,3 +30,5 @@
     </table>
 </div>
 {% endblock %}
+{%block main_css%} <link href="{{ url_for('static', filename='assets/css/style.css') }}" rel="stylesheet"> {%endblock%}
+

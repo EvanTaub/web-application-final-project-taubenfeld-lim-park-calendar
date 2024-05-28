@@ -11,7 +11,9 @@ import csv, io
 from extensions import db  
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
-
+from functools import wraps
+from flask import abort
+from flask_login import login_user, current_user, logout_user, login_required
 # app = Flask(__name__)
 # app.secret_key ='soujgpoisefpowigmppwoigvhw0wefwefwogihj'
 
@@ -65,16 +67,16 @@ class User(UserBase):
 
 class Teacher(User):
     __tablename__ = 'teacher'
-    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    # id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     
 
 class Admin(Teacher):
     __tablename__ = 'admin'
-    id = db.Column(db.Integer, db.ForeignKey('teacher.id'), primary_key=True)
+    # id = db.Column(db.Integer, db.ForeignKey('teacher.id'), primary_key=True)
 
 class SuperAdmin(Admin):
     __tablename__ = 's_admin'
-    id = db.Column(db.Integer,db.ForeignKey('admin.id'), primary_key=True)
+    # id = db.Column(db.Integer,db.ForeignKey('admin.id'), primary_key=True)
 
 class Event(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -194,10 +196,18 @@ def leave_event(user_id, event_id, param):
     db.session.commit()
     return
 
-
+#Adds to Jinja Front
 def is_instance_of(user, class_name):
     cls = globals().get(class_name)
     if cls and isinstance(user,cls):
         return True
     return False
 
+# this is for @admin_required
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.account_type not in ['Admin', 'SuperAdmin']:
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function

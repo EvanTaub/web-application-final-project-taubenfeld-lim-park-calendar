@@ -21,6 +21,10 @@ from datetime import datetime
 from sqlalchemy.orm.attributes import flag_modified
 import random
 from jinja2 import Environment, FileSystemLoader
+
+from functools import wraps
+from flask import abort
+
 # twilio test
 
 
@@ -28,7 +32,7 @@ from twilio.rest import Client
 
 from database import login_manager
 from account_management import login_management, logout_main, register_main, load_user_main
-from classes import User, SuperAdmin, Admin, Teacher, ProjectWednesday, Event, Tournaments,Performances, parse_csv_data, upload_csv_tournaments, upload_csv_wednesday, enter_event, leave_event, is_instance_of
+from classes import User, SuperAdmin, Admin, Teacher, ProjectWednesday, Event, Tournaments,Performances, parse_csv_data, upload_csv_tournaments, upload_csv_wednesday, enter_event, leave_event, is_instance_of, admin_required
 #import from classes these old functions? -> join_project_wednesday, attend_performance, enter_tournament_compete, enter_tournament_spectate,
 
 from extensions import db, login_manager  # Adjust the import path as necessary
@@ -377,6 +381,12 @@ def display_performances():
                     flash("You have successfully ticketed for the performance!", "success")
                 else:
                     flash("You must be logged in to make this action!", "danger")
+            if 'leave_button' in request.form:
+                if 'id' in session:
+                    leave_event(current_user.id,performance.id,"Performances")
+                    flash("You have left this performance!", 'success')
+                else:
+                    flash("You must be logged in to perform this action!", 'danger')
 
         return render_template('view_performance.html', event=performance, event_date=performance_date)
 
@@ -837,13 +847,11 @@ def promote():
                         'last_name': user_to_promote.last_name,
                         'email': user_to_promote.email,
                         'password_hash': user_to_promote.password_hash,
-                        'phone_number': user_to_promote.phone_number,
-                        'joined_events': user_to_promote.joined_events
+                        'joined_events': user_to_promote.joined_events,
+                        'events_created': user_to_promote.events_created
                     }
+                    temp_id = user_to_promote.id
                     
-                    # Delete the current user role object
-                    
-                    db.session.commit()
                     # If the user is a teacher or admin, remove from the parent tables as well
                     try:
                         db.session.execute('DELETE FROM teacher WHERE id = :id', {'id': user_to_promote.id})
@@ -860,6 +868,9 @@ def promote():
                         db.session.commit()
                     except:
                         db.session.rollback()
+                    # Delete the current user role object
+                    db.session.delete(user_to_promote)
+                    db.session.commit()
                     
                     
 
@@ -870,21 +881,38 @@ def promote():
 
                     if NewRoleClass:
                         new_user = NewRoleClass(**user_data)
-                        user_to_promote.email = ''
+                        print(new_user)
+                        flag_modified(new_user,'joined_events')
+                        flag_modified(new_user,'events_created')
+                        new_user.id = None
                         db.session.add(new_user)
-                        tournaments_c = [tournament for tournament in Tournaments.query.all() if user_to_promote.id in tournament.participants["Competitors"]]
+                        db.session.commit() 
+
+                        new_user = User.query.filter_by(email = user_data["email"]).first()
+                        print(new_user)
+                        tournaments_c = [tournament for tournament in Tournaments.query.all() if temp_id in tournament.participants["Competitors"]]
                         for tournament in tournaments_c:
-                            tournament.participants["Competitors"].pop(tournament.participants["Competitors"].index(user_to_promote.id))
+                            tournament.participants["Competitors"].pop(tournament.participants["Competitors"].index(temp_id))
                             tournament.participants["Competitors"].append(new_user.id)
-                        events = [event for event in Event.query.all() if user_to_promote.id in event.participants["Joined Users"]]
+                            # new_user.joined_events["Tournaments Competing"].append(tournament.name)
+                            flag_modified(tournament,'participants')
+                        events = [event for event in Event.query.all() if temp_id in event.participants["Joined Users"]]
                         for event in events:
-                            event.participants["Joined Users"].pop(event.participants["Joined Users"].index(user_to_promote.id))
+                            event.participants["Joined Users"].pop(event.participants["Joined Users"].index(temp_id))
                             event.participants["Joined Users"].append(new_user.id)
-                        db.session.delete(user_to_promote)
+                            flag_modified(event,'participants')
+                        new_user.account_type = new_role
+                        
+                        
 
                     #update the events the user has joined
                         
+                        flag_modified(new_user,'joined_events')
+                        flag_modified(new_user,'events_created')
                         db.session.commit()  # Save changes
+                        if session['id'] == temp_id:
+                            session.pop('id')
+                            session['id'] = temp_id
 
                         flash(f"User {user_to_promote.email} promoted to {new_role}", 'success')
                     else:
@@ -938,21 +966,44 @@ def promote_self_to_superadmin():
     else:
         print(f"User with email {email} not found.")
 
-
+@app.route('/admin')
+@login_required
+@admin_required
+def admin_dashboard():
+    # You can add additional context or checks here if necessary
+    return render_template('admin_dashboard.html')
 
 @app.route('/admin/users')
+@login_required
+@admin_required
 def admin_users():
     users = User.query.all()
     return render_template('admin_users.html', users=users)
 
 @app.route('/admin/user/<int:user_id>')
 @login_required
+@admin_required
 def view_user_profile(user_id):
     user = User.query.get_or_404(user_id)
     p_wed = Event.query.filter_by(name=user.joined_events.get("Project Wednesday")).first()
     tournaments_s = [tournament for tournament in Tournaments.query.all() if user.id in tournament.participants["Joined Users"]]
     tournaments_c = [tournament for tournament in Tournaments.query.all() if user.id in tournament.participants["Competitors"]]
-    return render_template('profile.html', user=user, event=p_wed, tournaments_c=tournaments_c, tournaments_s=tournaments_s)
+    performances = [performance for performance in Performances.query.all() if user.id in performance.participants["Joined Users"]]
+    return render_template('admin-profile.html', user=user, event=p_wed, tournaments_s=tournaments_s, tournaments_c=tournaments_c, performances=performances)
+
+@app.route('/admin/leave_event', methods=['POST'])
+@login_required
+@admin_required
+def admin_leave_event():
+    user_id = request.form.get('user_id')
+    event_id = request.form.get('event_id')
+    event_type = request.form.get('event_type')
+    print(event_type)
+    
+    leave_event(int(user_id), event_id, event_type)
+    
+    flash("User has been removed from the event.", "success")
+    return redirect(url_for('view_user_profile', user_id=user_id))
 
 
 
