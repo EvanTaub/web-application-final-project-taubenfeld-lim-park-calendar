@@ -50,7 +50,6 @@ class UserBase(db.Model, UserMixin):
     phone_number = db.Column(db.String(10), nullable=False, default='')
     account_type = db.Column(db.String(255), nullable=False, default="Student")
     joined_events = db.Column(JSON, default = load_default_events)
-    events_created = db.Column(JSON, default = load_create_default)
 
 
     def set_password(self, password):
@@ -68,6 +67,7 @@ class User(UserBase):
 class Teacher(User):
     __tablename__ = 'teacher'
     # id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    events_created = db.Column(JSON, default = load_create_default)
     
 
 class Admin(Teacher):

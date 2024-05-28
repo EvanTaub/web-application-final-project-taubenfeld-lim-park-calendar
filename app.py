@@ -841,16 +841,30 @@ def promote():
                 elif (current_user_obj.account_type == 'SuperAdmin' and user_to_promote.account_type == 'SuperAdmin'):
                     flash("SuperAdmins can't modify SuperAdmins.", 'danger')
                 else:
+                   
+
                     # Store current user data
                     user_data = {
                         'first_name': user_to_promote.first_name,
                         'last_name': user_to_promote.last_name,
                         'email': user_to_promote.email,
                         'password_hash': user_to_promote.password_hash,
-                        'joined_events': user_to_promote.joined_events,
-                        'events_created': user_to_promote.events_created
+                        'joined_events': user_to_promote.joined_events
                     }
                     temp_id = user_to_promote.id
+
+                    #obtain new class
+                    NewRoleClass = role_map.get(new_role)
+                    if hasattr(user_to_promote,'events_created'):
+                        user_data["events_created"] = user_to_promote.events_created
+
+                    #keep session in case you change your own permissions
+                    if session['id'] == temp_id:
+                            logout_user()
+                            session['id'] = temp_id
+                            session_restore = True
+
+                
                     
                     # If the user is a teacher or admin, remove from the parent tables as well
                     try:
@@ -869,6 +883,8 @@ def promote():
                     except:
                         db.session.rollback()
                     # Delete the current user role object
+                    
+
                     db.session.delete(user_to_promote)
                     db.session.commit()
                     
@@ -877,19 +893,20 @@ def promote():
                     # Map the new role to the correct class
                   
 
-                    NewRoleClass = role_map.get(new_role)
+                   
 
                     if NewRoleClass:
                         new_user = NewRoleClass(**user_data)
-                        print(new_user)
                         flag_modified(new_user,'joined_events')
-                        flag_modified(new_user,'events_created')
-                        new_user.id = None
+                        if hasattr(user_to_promote,'events_created'):
+                            flag_modified(new_user,'events_created')
                         db.session.add(new_user)
                         db.session.commit() 
-
+                        if session_restore:
+                            login_user(new_user)
                         new_user = User.query.filter_by(email = user_data["email"]).first()
                         print(new_user)
+                        #migrate existing event data to new user object
                         tournaments_c = [tournament for tournament in Tournaments.query.all() if temp_id in tournament.participants["Competitors"]]
                         for tournament in tournaments_c:
                             tournament.participants["Competitors"].pop(tournament.participants["Competitors"].index(temp_id))
@@ -908,11 +925,11 @@ def promote():
                     #update the events the user has joined
                         
                         flag_modified(new_user,'joined_events')
-                        flag_modified(new_user,'events_created')
+                        if hasattr(new_user, 'events_created'):
+                            flag_modified(new_user,'events_created')
                         db.session.commit()  # Save changes
-                        if session['id'] == temp_id:
-                            session.pop('id')
-                            session['id'] = temp_id
+                        
+
 
                         flash(f"User {user_to_promote.email} promoted to {new_role}", 'success')
                     else:
