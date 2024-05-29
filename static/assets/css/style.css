@@ -2422,3 +2422,174 @@ section {
   font-size: 13px;
   color: #012970;
 }
+
+header {
+  display: flex;
+  align-items: center;
+  font-size: calc(16px + (26 - 16) * ((100vw - 300px) / (1600 - 300)));
+  justify-content: center;
+  margin-bottom: 2em;
+  background: #fff;
+  color: #000;
+  min-height: 10vh;
+  text-align: center;
+}
+
+ul, ol {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-gap: 1em;
+  margin: 0 auto;
+  max-width: 64em;
+  padding: 0;
+}
+
+li {
+  display: flex;
+  align-items: start;
+  justify-content: start;
+  list-style: none;
+  margin-left: 0;
+  font-size: calc(16px + (21 - 16) * ((100vw - 300px) / (1600 - 300)));
+}
+
+ul.weekdays {
+  margin-bottom: 1em;
+}
+
+ul.weekdays li {
+  height: 4vw;
+}
+
+ol.day-grid li {
+  background-color: #eaeaea;
+  border: 1px solid #eaeaea;
+  height: 12vw;
+  max-height: 125px;
+}
+
+ul.weekdays abbr[title] {
+  border: none;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+ol.day-grid li:nth-child(1),
+ol.day-grid li:nth-child(2),
+ol.day-grid li:nth-child(3),
+ol.day-grid li:nth-child(34),
+ol.day-grid li:nth-child(35) {
+  background-color: #fff;
+}
+
+@media all and (max-width: 800px) {
+  ul, ol {
+    grid-gap: .25em;
+  }
+  
+  ul.weekdays li {
+    font-size: 0;
+  }
+  
+  ul.weekdays > li abbr:after {
+      content: attr(title);
+      font-size: calc(16px + (26 - 16) * ((100vw - 300px) / (1600 - 300)));
+    text-align: center;
+    }
+}
+
+div.event-list {
+  display: flex; /* Add this line to make the container flex */
+  align-items: flex-end; /* Align items to the bottom of the container */
+  justify-content: flex-end; /* Align items to the start (left) of the container */
+  height: 100%;
+}
+
+.table-1 {
+  margin-bottom: 0; /* Remove any default margin */
+  font-size: 12px
+}
+
+.dateinfo {
+  align-items: center; 
+  justify-content: center;
+  font-size: 60px
+}
+
+/* .card p {
+  
+} */
+
+/* EVENTS LIST CSS*/
+
+
+.row-events {
+  margin-top: 30px;
+}
+
+.col-event {
+  padding-right: 40px;
+  margin-right: 50px;
+}
+
+.card-event {
+  padding-top: 15px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-bottom: 15px;
+  
+}
+
+.event-title {
+  font-family: "Poppins";
+  font-size: 20px;
+  text-decoration: underline;
+}
+
+.event-desc {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease;
+  /*hey :)  nothing to add here yet..*/
+}
+
+.event-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center center;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.event-determination-img {
+  margin: auto;
+  width: 60%;
+  height: 60%;
+}
+
+.animate {
+  max-height: 200px;
+}
+
+.event-content {
+  margin-top: 20%;
+}
+
+.container-determine-event {
+  margin: auto;
+  text-align: center;
+}
+/* 
+@keyframes animation {
+  from {
+    bottom: -60px;
+  }
+  to {
+    bottom: 120px;
+  }
+} */

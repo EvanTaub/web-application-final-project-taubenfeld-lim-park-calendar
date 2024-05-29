@@ -46,38 +46,32 @@
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
 
       <a href="/" class="logo d-flex align-items-center">
-        <img src="{{url_for('static', filename='assets/img/bt logo.png')}}" style = "width:30%; height:30%" alt="">
+        <img src="static/assets/img/bt logo.png" style = "width:30%; height:30%" alt="">
         <span>BTSignUp</span>
       </a>
 
       <nav id="navbar" class="navbar">
         <ul>
           <li><a class="nav-link scrollto {{'active' if active_page == 'index'}}" href="/">Home</a></li>
-          {%if current_user.is_authenticated%}
+          {%if True%}
           <li class="dropdown"><a href="#" class = "{{'active' if active_page == 'events'}}"><span>Events</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
-              {%if current_user.account_type == "Admin" or current_user.account_type == "SuperAdmin" or current_user.account_type == "Teacher"%}
               <li><a href="/events">View Events</a></li>
               <li><a href="/add">Add Events</a></li>
               <li><a href="/edit">Edit Events</a></li> <!-- Admin access only-->
-              {%else%}
-              <li><a href="/events">View Events</a></li>
-              {%endif%}
             </ul>
           </li>
           {%else%}
           <li><a href="/events" class = "{{'active' if active_page == 'events'}}">Events</a></li>
           {%endif%}
-          {% if current_user.is_authenticated %}
-            {% if current_user.account_type in ["Admin", "SuperAdmin"] %}
-              <li><a href="/admin" class="{{ 'active' if active_page == 'admin' }}">Admin Dashboard</a></li>
-            {% endif %}
-            <li><a href="{{ url_for('profile') }}" class="{{ 'active' if active_page == 'profile' }}">Profile</a></li>
-            <li><a href="/logout" class="{{ 'active' if active_page == 'logout' }}">Logout</a></li>
-          {% else %}
-            <li><a href="/register" class="{{ 'active' if active_page == 'register' }}">Register</a></li>
-            <li><a href="/login" class="{{ 'active' if active_page == 'login' }}">Login</a></li>
-          {% endif %}
+          <li><a href="/newsletter" class = "{{'active' if active_page == 'newsletter'}}">School Newsletter</a></li>
+          {%if current_user.is_authenticated%}
+          <li><a href="/profile" class = "{{'active' if active_page == 'profile'}}">Profile</a></li> <!-- if user is logged in-->
+          <li><a href="/logout" class = "{{'active' if active_page == 'logout'}}" >Logout</a></li> <!-- if user is logged in-->
+          {%else%} 
+          <li><a href="/register" class = "{{'active' if active_page == 'register'}}" >Register</a></li> <!-- if user is not logged in-->
+          <li><a href="/login" class = "{{'active' if active_page == 'login'}}" >Login</a></li> <!-- if user is not logged in-->
+          {%endif%}
           
           
           

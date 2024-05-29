@@ -293,3 +293,5 @@
   new PureCounter();
 
 })();
+
+const closing_btns = document.querySelectorAll('.btn-close')
