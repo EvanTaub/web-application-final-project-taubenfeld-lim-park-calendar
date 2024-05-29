@@ -10,6 +10,8 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="text-right">Joined Events</h4>
                 </div>
+
+                <div class="row">
                 <div class="col-md-12">
                     <h3>Project Wednesday</h3>
                     {% if event %}
@@ -18,6 +20,9 @@
                         <p>No joined events</p>
                     {% endif %}
                 </div>
+                </div>
+
+                <div class="row">
                 <div class="col-md-12">
                     <h3>Tournaments (Spectating)</h3>
                     {% if tournaments_s %}
@@ -28,15 +33,21 @@
                         <p>No spectating tournaments</p>
                     {% endif %}
                 </div>
-                <div class="col-md-12">
-                    <h3>Tournaments (Competing)</h3>
-                    {% if tournaments_c %}
-                        {% for tournament_c in tournaments_c %}
-                            <h4><a href="{{ url_for('display_tournaments', event_id=tournament_c.id) }}">{{ tournament_c.name }}</a></h4>
-                        {% endfor %}
-                    {% else %}
-                        <p>No competing tournaments</p>
-                    {% endif %}
+              </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <h3>Tournaments (Competing)</h3>
+                        {% if tournaments_c %}
+                            {% for tournament_c in tournaments_c %}
+                                <h4><a href="{{ url_for('display_tournaments', event_id=tournament_c.id) }}">{{ tournament_c.name }}</a></h4>
+                            {% endfor %}
+                        {% else %}
+                            <p>No competing tournaments</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-md-12">
                         <h3>Performances</h3>
                         {% if performances%}
@@ -48,13 +59,8 @@
                         {% endif %}
                     </div>
                 </div>
-               
-            
-                
-
             </div>
         </div>
-    </div>
         
         <!-- Right side for read-only profile information -->
         <div class="col-md-7">

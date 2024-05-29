@@ -6,6 +6,7 @@ import json
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import Column, Integer, String, ForeignKey, LargeBinary, Boolean, Float, Table
 from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy.orm import relationship, backref
 from werkzeug.security import generate_password_hash, check_password_hash
 import csv, io
 from extensions import db  
@@ -64,20 +65,37 @@ class UserBase(db.Model, UserMixin):
 class User(UserBase):
     __tablename__ = 'users'
 
-class Teacher(User):
-    __tablename__ = 'teacher'
-    # id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    events_created = db.Column(JSON, default = load_create_default)
-    
+     # Define one-to-one relationship with Teacher
+    teacher = relationship("Teacher", uselist=False, back_populates="user")
 
-class Admin(Teacher):
-    __tablename__ = 'admin'
-    # id = db.Column(db.Integer, db.ForeignKey('teacher.id'), primary_key=True)
+    # Define one-to-one relationship with Admin
+    admin = relationship("Admin", uselist=False, back_populates="user")
+
+class Teacher(User):
+    __tablename__ = 'teachers'
+    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    __mapper_args__ = {
+        'polymorphic_identity': 'teacher',
+        'inherit_condition': id == User.id
+    }
+    user = relationship("User", back_populates="teacher")
+
+class Admin(User):
+    __tablename__ = 'admins'
+    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    __mapper_args__ = {
+        'polymorphic_identity': 'admin',
+        'inherit_condition': id == User.id
+    }
+    user = relationship("User", back_populates="admin")
 
 class SuperAdmin(Admin):
     __tablename__ = 's_admin'
-    # id = db.Column(db.Integer,db.ForeignKey('admin.id'), primary_key=True)
-
+    id = db.Column(db.Integer, db.ForeignKey('admins.id'), primary_key=True)
+    __mapper_args__ = {
+        'polymorphic_identity': 'superadmin',
+        'inherit_condition': id == Admin.id
+    }
 class Event(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)

@@ -184,11 +184,11 @@ def google_auth():
 # client id 867012396004-2orvos6k259l1v8gu8u6ntl9re438fl9.apps.googleusercontent.com
 # client secret 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
 
-
-
-
-
-
+@login_manager.unauthorized_handler
+def unauthorized():
+    # Redirect to login page with a message
+    flash('You must login to access this page!','warning')
+    return redirect(url_for('login'))
 
 
 # # Send a Verification Email:
@@ -272,6 +272,7 @@ def logout():
 
 
 @app.route('/events', methods = ["GET", "POST"])
+@login_required
 def event():
     if request.method == "GET":
         events = Event.query.all() #filter(not_(ProjectWednesday.cycle_number)).all()
@@ -326,6 +327,7 @@ def event():
         return redirect(url_for('event'))
 
 @app.route('/events/project_wednesday', methods=['GET', 'POST'])
+@login_required
 def display_pw():
     projects = ProjectWednesday.query.all() #filter(not_(ProjectWednesday.cycle_number)).all()
     num_events = len(projects)
@@ -364,6 +366,7 @@ def display_pw():
     return render_template('project_wednesdays.html', events=events)
 
 @app.route('/events/performances', methods=['GET', 'POST'])
+@login_required
 def display_performances(): 
     performances = Performances.query.all() #filter(not_(ProjectWednesday.cycle_number)).all()
     num_events = len(performances)
@@ -394,6 +397,7 @@ def display_performances():
     return render_template('performances.html', events=events)
 
 @app.route('/events/tournaments', methods=['GET', 'POST'])
+@login_required
 def display_tournaments(): 
     tournaments = Tournaments.query.all() #filter(not_(ProjectWednesday.cycle_number)).all()
     num_events = len(tournaments)
@@ -452,7 +456,7 @@ def display_tournaments():
 #         return render_template("inventory.html", books = books, pagination=pagination)
 
 @app.route("/add")
-# @login_required
+@login_required
 def add():
     return render_template("add_event_determination.html")
 
@@ -641,7 +645,7 @@ def process_performance_data(param, event):
 
 
 @app.route("/add/performances", methods=['GET', 'POST'])
-# @login_required
+@login_required
 def add_performance_route():
     return render_template("add-events-performance.html")
 
@@ -703,12 +707,12 @@ def add_projects():
 
 
 @app.route("/add/tournaments")
-# @login_required
+@login_required
 def add_tournaments():
     return render_template("add-events-tournaments.html")
 
 @app.route("/edit")
-# @login_required
+@login_required
 def edit():
     events = Event.query.filter_by(creator_id=current_user.id).all()
     if len(events) > 0:
@@ -720,6 +724,7 @@ def edit():
     return redirect(url_for('index'))
 
 @app.route('/edit/performance', methods=['GET', 'POST'])
+@login_required
 def edit_performance():
     if request.method == 'GET':
         event_id = request.args.get("event_id")
@@ -735,6 +740,7 @@ def edit_performance():
     
 
 @app.route('/edit/tournament', methods=['GET', 'POST'])
+@login_required
 def edit_tournament():
     if request.method == "GET":
     # if "event_id" in request.args:
@@ -750,6 +756,7 @@ def edit_tournament():
             return redirect(url_for('edit'))
 
 @app.route('/edit/project_wednesday', methods=['GET', 'POST'])
+@login_required
 def edit_project_wednesday():
     if request.method == "GET":
         event_id = request.args.get("event_id")
@@ -778,6 +785,7 @@ def edit_project_wednesday():
 #             return render_template('edit_performance.html',event=event)
 
 @app.route('/remove_event')
+@login_required
 def remove_event():
     event_id = request.args.get('event_id')
     print(event_id)
@@ -816,14 +824,18 @@ def profile():
 @app.route('/promote', methods=['GET', 'POST'])
 @login_required
 def promote():
-    current_user_obj = User.query.get(int(session['id']))  # Retrieve the current user by ID
-    users = User.query.all()
     role_map = {
                         'SuperAdmin': SuperAdmin,
                         'Admin': Admin,
                         'Teacher': Teacher,
-                        'User': User
+                        'Student': User
                     }
+    current_user_obj = User.query.get(current_user.id)# Retrieve the current user by ID
+    try:
+        current_user_obj = role_map[current_user_obj.account_type].query.filter_by(id = current_user.id).first()
+    except:
+        pass
+    users = User.query.all()
     if request.method == 'GET':
         return render_template('promote.html', users=users)  # Pass users to the template
 
@@ -833,6 +845,11 @@ def promote():
 
         if user_id and new_role:
             user_to_promote = User.query.get(int(user_id))
+            print(user_to_promote)
+            cls = role_map[user_to_promote.account_type]
+            print(type(cls))
+            user_to_promote = cls.query.filter_by(id = user_to_promote.id).first()
+            print(user_to_promote)
 
             if user_to_promote:
                 # Check if the promotion is allowed
@@ -860,9 +877,11 @@ def promote():
 
                     #keep session in case you change your own permissions
                     if session['id'] == temp_id:
-                            logout_user()
-                            session['id'] = temp_id
-                            session_restore = True
+                        logout_user()
+                        session['id'] = temp_id
+                        session_restore = True
+                    else:
+                        session_restore = False
 
                 
                     
@@ -1021,6 +1040,10 @@ def admin_leave_event():
     
     flash("User has been removed from the event.", "success")
     return redirect(url_for('view_user_profile', user_id=user_id))
+
+@app.route('/presentation')
+def presentation():
+    return render_template('presentation.html')
 
 
 
