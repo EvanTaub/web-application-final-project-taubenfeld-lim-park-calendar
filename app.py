@@ -174,7 +174,7 @@ def logout():
 
 
 @app.route('/events', methods = ["GET", "POST"])
-@login_required
+# @login_required
 def event():
     if request.method == "GET":
         events = Event.query.all() 
@@ -218,7 +218,7 @@ def event():
         return redirect(url_for('event'))
 
 @app.route('/events/project_wednesday', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def display_pw():
     projects = ProjectWednesday.query.all() 
     num_events = len(projects)
@@ -257,7 +257,7 @@ def display_pw():
     return render_template('project_wednesdays.html', events=events)
 
 @app.route('/events/performances', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def display_performances(): 
     performances = Performances.query.all() 
     num_events = len(performances)
@@ -288,7 +288,7 @@ def display_performances():
     return render_template('performances.html', events=events)
 
 @app.route('/events/tournaments', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def display_tournaments(): 
     tournaments = Tournaments.query.all() 
     num_events = len(tournaments)
@@ -620,7 +620,7 @@ def remove_event():
 @app.route('/profile', methods=["GET", "POST"])
 @login_required
 def profile():
-    user = User.query.get(int(session['id']))
+    user = User.query.get(current_user.id)
     if request.method == 'GET':
         p_wed = Event.query.filter_by(name=user.joined_events.get("Project Wednesday")).first()
         tournaments_s = [tournament for tournament in Tournaments.query.all() if user.id in tournament.participants["Joined Users"]]
@@ -732,6 +732,11 @@ def promote():
                             event.participants["Joined Users"].pop(event.participants["Joined Users"].index(temp_id))
                             event.participants["Joined Users"].append(new_user.id)
                             flag_modified(event,'participants')
+                        #migrate created events
+                        events = [event for event in Event.query.all() if temp_id == event.creator_id]
+                        for event in events:
+                            event.creator_id == new_user.id
+                        
                         new_user.account_type = new_role #update the events the user has joined
 
                         flag_modified(new_user,'joined_events')
