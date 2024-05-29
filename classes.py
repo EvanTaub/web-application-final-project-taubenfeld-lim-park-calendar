@@ -15,12 +15,6 @@ from jinja2 import Environment, FileSystemLoader
 from functools import wraps
 from flask import abort
 from flask_login import login_user, current_user, logout_user, login_required
-# app = Flask(__name__)
-# app.secret_key ='soujgpoisefpowigmppwoigvhw0wefwefwogihj'
-
-# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///calendar.db"
-# db = SQLAlchemy(app)
-
 
 # flag_modified(user_instance, 'modified parameter') when modifying json file; tell database json is modified
 def load_default_events():
@@ -109,8 +103,6 @@ class Event(db.Model, UserMixin):
     def __repr__(self):
         return f"Event Type: {self.__class__.__name__}\nName: {self.name}\n ID: {self.id}\n Creator ID: {self.creator_id}"
 
-
-
 class ProjectWednesday(Event):
     id = db.Column(db.Integer, db.ForeignKey('event.id'), primary_key=True, autoincrement=True)
     cycle_number = db.Column(db.Integer, default=1, nullable=False)
@@ -132,15 +124,12 @@ class Performances(Event):
     cost_audience = db.Column(db.Float, default=1, nullable=False)
     date_of_performance = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-
-
 def parse_csv_data(csv_file):
     text_data = csv_file.read().decode("utf-8")
     reader = csv.reader(io.StringIO(text_data))
     headers = next(reader)  # Skip header
     data = [row for row in reader]
     return data
-
 
 def upload_csv_tournaments(csv_data, creator_id):
     for row in csv_data:
