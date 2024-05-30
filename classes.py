@@ -218,3 +218,11 @@ def admin_required(f):
             abort(403)
         return f(*args, **kwargs)
     return decorated_function
+# this is for @teacher_required
+def teacher_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.account_type not in ['Teacher','Admin', 'SuperAdmin']:
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function

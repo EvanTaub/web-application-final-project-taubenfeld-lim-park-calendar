@@ -22,7 +22,7 @@ from functools import wraps
 from flask import abort
 from database import login_manager
 from account_management import login_management, logout_main, register_main, load_user_main
-from classes import User, SuperAdmin, Admin, Teacher, ProjectWednesday, Event, Tournaments,Performances, parse_csv_data, upload_csv_tournaments, upload_csv_wednesday, enter_event, leave_event, is_instance_of, admin_required
+from classes import User, SuperAdmin, Admin, Teacher, ProjectWednesday, Event, Tournaments,Performances, parse_csv_data, upload_csv_tournaments, upload_csv_wednesday, enter_event, leave_event, is_instance_of, admin_required, teacher_required
 from extensions import db, login_manager  
 
 app = Flask(__name__)
@@ -337,6 +337,7 @@ def display_tournaments():
 
 @app.route("/add")
 @login_required
+@teacher_required
 def add():
     return render_template("add_event_determination.html")
 
@@ -486,11 +487,13 @@ def process_performance_data(param, event):
         
 @app.route("/add/performances", methods=['GET', 'POST'])
 @login_required
+@teacher_required
 def add_performance_route():
     return render_template("add-events-performance.html")
 
 @app.route("/add/project_wednesdays", methods=['GET', 'POST'])
 @login_required
+@teacher_required
 def add_projects():
     if request.method == "POST":
         if 'event_submit' in request.form:
@@ -545,11 +548,13 @@ def add_projects():
 
 @app.route("/add/tournaments")
 @login_required
+@teacher_required
 def add_tournaments():
     return render_template("add-events-tournaments.html")
 
 @app.route("/edit")
 @login_required
+@teacher_required
 def edit():
     events = Event.query.filter_by(creator_id=current_user.id).all()
     if len(events) > 0:
@@ -562,6 +567,7 @@ def edit():
 
 @app.route('/edit/performance', methods=['GET', 'POST'])
 @login_required
+@teacher_required
 def edit_performance():
     if request.method == 'GET':
         event_id = request.args.get("event_id")
@@ -577,6 +583,7 @@ def edit_performance():
     
 @app.route('/edit/tournament', methods=['GET', 'POST'])
 @login_required
+@teacher_required
 def edit_tournament():
     if request.method == "GET":
     # if "event_id" in request.args:
@@ -592,6 +599,7 @@ def edit_tournament():
 
 @app.route('/edit/project_wednesday', methods=['GET', 'POST'])
 @login_required
+@teacher_required
 def edit_project_wednesday():
     if request.method == "GET":
         event_id = request.args.get("event_id")
@@ -605,6 +613,7 @@ def edit_project_wednesday():
     
 @app.route('/remove_event')
 @login_required
+@teacher_required
 def remove_event():
     event_id = request.args.get('event_id')
     event = Event.query.get(int(event_id))
@@ -629,130 +638,144 @@ def profile():
         return render_template('profile.html', user=user, event=p_wed, tournaments_c=tournaments_c, tournaments_s=tournaments_s, performances = performances)
     return render_template('profile.html', user=user, event=p_wed, tournaments_c=tournaments_c, tournaments_s=tournaments_s, performances = performances)
 
+def check_admin():
+    admins = Admin.query.all()
+    print(admins)
+    for user in admins:
+        if current_user.id == user.id:
+            return True 
+    return False
+
 # Import necessary modules
 @app.route('/promote', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def promote():
-    role_map = {
-                        'SuperAdmin': SuperAdmin,
-                        'Admin': Admin,
-                        'Teacher': Teacher,
-                        'Student': User
-                    }
-    current_user_obj = User.query.get(current_user.id)# Retrieve the current user by ID
-    try:
-        current_user_obj = role_map[current_user_obj.account_type].query.filter_by(id = current_user.id).first()
-    except:
-        pass
-    users = User.query.all()
-    if request.method == 'GET':
-        return render_template('promote.html', users=users)  # Pass users to the template
+    if check_admin():
 
-    if request.method == 'POST':
-        user_id = request.form.get('user_id')
-        new_role = request.form.get('new_role')
+        role_map = {
+                            'SuperAdmin': SuperAdmin,
+                            'Admin': Admin,
+                            'Teacher': Teacher,
+                            'Student': User
+                        }
+        current_user_obj = User.query.get(current_user.id)# Retrieve the current user by ID
+        try:
+            current_user_obj = role_map[current_user_obj.account_type].query.filter_by(id = current_user.id).first()
+        except:
+            pass
+        users = User.query.all()
+        if request.method == 'GET':
+            return render_template('promote.html', users=users)  # Pass users to the template
 
-        if user_id and new_role:
-            user_to_promote = User.query.get(int(user_id))
-            cls = role_map[user_to_promote.account_type]
-            user_to_promote = cls.query.filter_by(id = user_to_promote.id).first()
+        if request.method == 'POST':
+            user_id = request.form.get('user_id')
+            new_role = request.form.get('new_role')
 
-            if user_to_promote:
-                # Check if the promotion is allowed
-                if (current_user_obj.account_type == 'Admin' and user_to_promote.account_type in ['Admin', 'SuperAdmin']):
-                    flash("Admins can't modify Admins or SuperAdmins.", 'danger')
-                elif (current_user_obj.account_type == 'SuperAdmin' and user_to_promote.account_type == 'SuperAdmin'):
-                    flash("SuperAdmins can't modify SuperAdmins.", 'danger')
-                else:
-                   
-                    # Store current user data
-                    user_data = {
-                        'first_name': user_to_promote.first_name,
-                        'last_name': user_to_promote.last_name,
-                        'email': user_to_promote.email,
-                        'password_hash': user_to_promote.password_hash,
-                        'joined_events': user_to_promote.joined_events
-                    }
-                    temp_id = user_to_promote.id
+            if user_id and new_role:
+                user_to_promote = User.query.get(int(user_id))
+                cls = role_map[user_to_promote.account_type]
+                user_to_promote = cls.query.filter_by(id = user_to_promote.id).first()
 
-                    #obtain new class
-                    NewRoleClass = role_map.get(new_role)
-                    if hasattr(user_to_promote,'events_created'):
-                        user_data["events_created"] = user_to_promote.events_created
-
-                    #keep session in case you change your own permissions
-                    if session['id'] == temp_id:
-                        logout_user()
-                        session['id'] = temp_id
-                        session_restore = True
+                if user_to_promote:
+                    # Check if the promotion is allowed
+                    if (current_user_obj.account_type == 'Admin' and user_to_promote.account_type in ['Admin', 'SuperAdmin']):
+                        flash("Admins can't modify Admins or SuperAdmins.", 'danger')
+                    elif (current_user_obj.account_type == 'SuperAdmin' and user_to_promote.account_type == 'SuperAdmin'):
+                        flash("SuperAdmins can't modify SuperAdmins.", 'danger')
                     else:
-                        session_restore = False
+                    
+                        # Store current user data
+                        user_data = {
+                            'first_name': user_to_promote.first_name,
+                            'last_name': user_to_promote.last_name,
+                            'email': user_to_promote.email,
+                            'password_hash': user_to_promote.password_hash,
+                            'joined_events': user_to_promote.joined_events
+                        }
+                        temp_id = user_to_promote.id
 
-                    # If the user is a teacher or admin, remove from the parent tables as well
-                    try:
-                        db.session.execute('DELETE FROM teacher WHERE id = :id', {'id': user_to_promote.id})
-                        db.session.commit()
-                    except:
-                        db.session.rollback()
-                    try:
-                        db.session.execute('DELETE FROM admin WHERE id = :id', {'id': user_to_promote.id})
-                        db.session.commit()
-                    except:
-                        db.session.rollback()
-                    try:
-                        db.session.execute('DELETE FROM superadmins WHERE id = :id', {'id': user_to_promote.id})
-                        db.session.commit()
-                    except:
-                        db.session.rollback()
-                    # Delete the current user role object
-
-                    db.session.delete(user_to_promote)
-                    db.session.commit()               
-
-                    # Map the new role to the correct class
-                  
-                    if NewRoleClass:
-                        new_user = NewRoleClass(**user_data)
-                        flag_modified(new_user,'joined_events')
+                        #obtain new class
+                        NewRoleClass = role_map.get(new_role)
                         if hasattr(user_to_promote,'events_created'):
-                            flag_modified(new_user,'events_created')
-                        db.session.add(new_user)
-                        db.session.commit() 
-                        if session_restore:
-                            login_user(new_user)
-                        new_user = User.query.filter_by(email = user_data["email"]).first()
-                        # migrate existing event data to new user object
-                        tournaments_c = [tournament for tournament in Tournaments.query.all() if temp_id in tournament.participants["Competitors"]]
-                        for tournament in tournaments_c:
-                            tournament.participants["Competitors"].pop(tournament.participants["Competitors"].index(temp_id))
-                            tournament.participants["Competitors"].append(new_user.id)
-                            flag_modified(tournament,'participants')
-                        events = [event for event in Event.query.all() if temp_id in event.participants["Joined Users"]]
-                        for event in events:
-                            event.participants["Joined Users"].pop(event.participants["Joined Users"].index(temp_id))
-                            event.participants["Joined Users"].append(new_user.id)
-                            flag_modified(event,'participants')
-                        #migrate created events
-                        events = [event for event in Event.query.all() if temp_id == event.creator_id]
-                        for event in events:
-                            event.creator_id == new_user.id
-                        
-                        new_user.account_type = new_role #update the events the user has joined
+                            user_data["events_created"] = user_to_promote.events_created
 
-                        flag_modified(new_user,'joined_events')
-                        if hasattr(new_user, 'events_created'):
-                            flag_modified(new_user,'events_created')
-                        db.session.commit()  # Save changes
-                        
-                        flash(f"User {user_to_promote.email} promoted to {new_role}", 'success')
-                    else:
-                        flash("Invalid role specified", 'danger')
+                        #keep session in case you change your own permissions
+                        if session['id'] == temp_id:
+                            logout_user()
+                            session['id'] = temp_id
+                            session_restore = True
+                        else:
+                            session_restore = False
+
+                        # If the user is a teacher or admin, remove from the parent tables as well
+                        try:
+                            db.session.execute('DELETE FROM teacher WHERE id = :id', {'id': user_to_promote.id})
+                            db.session.commit()
+                        except:
+                            db.session.rollback()
+                        try:
+                            db.session.execute('DELETE FROM admin WHERE id = :id', {'id': user_to_promote.id})
+                            db.session.commit()
+                        except:
+                            db.session.rollback()
+                        try:
+                            db.session.execute('DELETE FROM superadmins WHERE id = :id', {'id': user_to_promote.id})
+                            db.session.commit()
+                        except:
+                            db.session.rollback()
+                        # Delete the current user role object
+
+                        db.session.delete(user_to_promote)
+                        db.session.commit()               
+
+                        # Map the new role to the correct class
+                    
+                        if NewRoleClass:
+                            new_user = NewRoleClass(**user_data)
+                            flag_modified(new_user,'joined_events')
+                            if hasattr(user_to_promote,'events_created'):
+                                flag_modified(new_user,'events_created')
+                            db.session.add(new_user)
+                            db.session.commit() 
+                            if session_restore:
+                                login_user(new_user)
+                            new_user = User.query.filter_by(email = user_data["email"]).first()
+                            # migrate existing event data to new user object
+                            tournaments_c = [tournament for tournament in Tournaments.query.all() if temp_id in tournament.participants["Competitors"]]
+                            for tournament in tournaments_c:
+                                tournament.participants["Competitors"].pop(tournament.participants["Competitors"].index(temp_id))
+                                tournament.participants["Competitors"].append(new_user.id)
+                                flag_modified(tournament,'participants')
+                            events = [event for event in Event.query.all() if temp_id in event.participants["Joined Users"]]
+                            for event in events:
+                                event.participants["Joined Users"].pop(event.participants["Joined Users"].index(temp_id))
+                                event.participants["Joined Users"].append(new_user.id)
+                                flag_modified(event,'participants')
+                            #migrate created events
+                            events = [event for event in Event.query.all() if temp_id == event.creator_id]
+                            for event in events:
+                                event.creator_id == new_user.id
+                            
+                            new_user.account_type = new_role #update the events the user has joined
+
+                            flag_modified(new_user,'joined_events')
+                            if hasattr(new_user, 'events_created'):
+                                flag_modified(new_user,'events_created')
+                            db.session.commit()  # Save changes
+                            
+                            flash(f"User {user_to_promote.email} promoted to {new_role}", 'success')
+                        else:
+                            flash("Invalid role specified", 'danger')
+                else:
+                    flash("User not found", 'danger')
             else:
-                flash("User not found", 'danger')
-        else:
-            flash("Invalid promotion request", 'danger')
+                flash("Invalid promotion request", 'danger')
 
         return redirect(url_for('promote'))
+    else:
+        flash('Invalid Clearance', 'danger')
+        return redirect(url_for('index'))
 
 @app.route('/admin')
 @login_required
@@ -793,6 +816,10 @@ def admin_leave_event():
 @app.route('/presentation')
 def presentation():
     return render_template('presentation.html')
+
+@app.errorhandler(403)
+def forbidden_error(error):
+    return render_template('403.html'), 403
 
 #add to Jinja Frontend
 @app.template_filter()
