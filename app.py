@@ -615,8 +615,27 @@ def edit_project_wednesday():
 @login_required
 @teacher_required
 def remove_event():
-    event_id = request.args.get('event_id')
-    event = Event.query.get(int(event_id))
+    event_id = int(request.args.get('event_id'))
+    # event = Event.query.get(int(event_id))
+    #determine event type
+    pweds = ProjectWednesday.query.all()
+    tournaments = Tournaments.query.all()
+    performances = Performances.query.all()
+    for pwed in pweds:
+        if event_id == pwed.id:
+            temp = ['Wed',True]
+    for tournament in tournaments:
+        if event_id == tournament.id:
+            temp = ['Tournament',True]
+    for performance in performances:
+        if event_id == performance.id:
+            temp = ['Performance', True]
+    if temp == ['Wed',True]:
+        event = ProjectWednesday.query.get(event_id)
+    elif temp == ['Tournament', True]:
+        event = Tournaments.query.get(event_id)
+    elif temp == ['Performance', True]:
+        event = Performances.query.get(event_id)
     try:
         db.session.delete(event)
         db.session.commit()
@@ -649,9 +668,9 @@ def check_admin():
 # Import necessary modules
 @app.route('/promote', methods=['GET', 'POST'])
 @login_required
-@admin_required
+# @admin_required
 def promote():
-    if check_admin():
+    # if check_admin():
 
         role_map = {
                             'SuperAdmin': SuperAdmin,
@@ -773,9 +792,9 @@ def promote():
                 flash("Invalid promotion request", 'danger')
 
         return redirect(url_for('promote'))
-    else:
-        flash('Invalid Clearance', 'danger')
-        return redirect(url_for('index'))
+    # else:
+    #     flash('Invalid Clearance', 'danger')
+    #     return redirect(url_for('index'))
 
 @app.route('/admin')
 @login_required
