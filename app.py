@@ -23,9 +23,9 @@ from flask import abort
 from database import login_manager
 from account_management import login_management, logout_main, register_main, load_user_main
 from classes import User, SuperAdmin, Admin, Teacher, ProjectWednesday, Event, Tournaments,Performances, parse_csv_data, upload_csv_tournaments, upload_csv_wednesday, enter_event, leave_event, is_instance_of, admin_required, teacher_required
-from extensions import db, login_manager  
+from extensions import db, login_manager
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 oauth = OAuth(app)
 app.config['SECRET_KEY'] = 'soujgpoisefpowigmppwoigvhw0wefwefwogihj'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///calendar.db'
@@ -59,7 +59,7 @@ with app.app_context():
 
 # Here you can register your blueprints or routes
 def generate_token():
-    return secrets.token_urlsafe(50)  
+    return secrets.token_urlsafe(50)
 
 @app.route('/google/')
 def google():
@@ -68,7 +68,7 @@ def google():
 
     # Redirect to google_auth function
     redirect_uri = url_for('google_auth', _external=True)
-    
+
     return oauth.google.authorize_redirect(redirect_uri, nonce=session['nonce'])
 
 @app.route('/google/auth/')
@@ -119,7 +119,6 @@ def google_auth():
 
     except Exception as e:
         print(f"Error: {e}")
-        flash('An error occurred during authentication.', 'danger')
         return redirect(url_for('index'))
 
 @login_manager.unauthorized_handler
@@ -145,7 +144,7 @@ def register():
 @app.route("/login", methods = ["GET", "POST"])
 def login():
     if request.method == "GET":
-        return render_template("login.html") 
+        return render_template("login.html")
     if request.method == "POST":
         var = login_management()
         if var[0]:
@@ -155,7 +154,7 @@ def login():
             return redirect(url_for('index'))
         else:
             flash('Invalid Credentials','danger')
-            return redirect(url_for('login')) 
+            return redirect(url_for('login'))
 
 @login_manager.user_loader
 @login_manager.user_loader
@@ -177,7 +176,7 @@ def logout():
 # @login_required
 def event():
     if request.method == "GET":
-        events = Event.query.all() 
+        events = Event.query.all()
         num_events = len(events)
         if num_events == 0:
             flash('There are no events at this time.', 'warning')
@@ -196,7 +195,7 @@ def event():
         if "performance_submit" in request.form:
             process_performance_data('add',None)
             return redirect(url_for('event'))
-        
+
         if "project_submit" in request.form:
             process_project_data('add',None)
             return redirect(url_for('event'))
@@ -212,7 +211,7 @@ def event():
         if "edit_event" in request.form:
             pass
             return render_template('events.html')
-    
+
 
         flash('Invalid event submission.', 'error')
         return redirect(url_for('event'))
@@ -220,7 +219,7 @@ def event():
 @app.route('/events/project_wednesday', methods=['GET', 'POST'])
 # @login_required
 def display_pw():
-    projects = ProjectWednesday.query.all() 
+    projects = ProjectWednesday.query.all()
     num_events = len(projects)
     if num_events == 0:
         flash('There is no Project Wednesday Cycle to join currently.', 'warning')
@@ -248,7 +247,7 @@ def display_pw():
                     else:
                         leave_event(current_user.id, project_wednesday.id, "Project Wednesday")
                         flash('You have successfully left this event', 'success')
-        
+
         if 'id' in session:
             return render_template('view_pw.html', event = project_wednesday, user= current_user)
         return render_template('view_pw.html', event=project_wednesday, user = '')
@@ -258,8 +257,8 @@ def display_pw():
 
 @app.route('/events/performances', methods=['GET', 'POST'])
 # @login_required
-def display_performances(): 
-    performances = Performances.query.all() 
+def display_performances():
+    performances = Performances.query.all()
     num_events = len(performances)
     if num_events == 0:
         flash('There are no performances at this time.', 'warning')
@@ -289,8 +288,8 @@ def display_performances():
 
 @app.route('/events/tournaments', methods=['GET', 'POST'])
 # @login_required
-def display_tournaments(): 
-    tournaments = Tournaments.query.all() 
+def display_tournaments():
+    tournaments = Tournaments.query.all()
     num_events = len(tournaments)
     if num_events == 0:
         flash('There are no tournaments at this time.', 'warning')
@@ -348,11 +347,11 @@ def process_tournament_data(param, event):
         date = datetime.strptime(datetime_data, '%Y-%m-%dT%H:%M')
         student_limit = request.form['student_limit']
         if 'event_pic' in request.files and request.files['event_pic'].filename != '':
-            event_pic_file = request.files['event_pic'] 
+            event_pic_file = request.files['event_pic']
             event_pic_data = event_pic_file.read()
-            image_data_b64 = base64.b64encode(event_pic_data).decode('utf-8') 
+            image_data_b64 = base64.b64encode(event_pic_data).decode('utf-8')
         else:
-            event_pic_data = ''
+            event_pic_data = None
             image_data_b64 = ''
         cost_competitor = request.form['cost_competitor']
         cost_spectator = request.form['cost_spectator']
@@ -390,7 +389,7 @@ def process_tournament_data(param, event):
                 flash('Tournament edited successfully!', 'success')
             except:
                 db.session.rollback()
-                flash('Something went wrong trying to edit the tournament information. Please try again.', 'danger')     
+                flash('Something went wrong trying to edit the tournament information. Please try again.', 'danger')
 
 def process_project_data(param, event):
         name = request.form['name']
@@ -436,7 +435,7 @@ def process_project_data(param, event):
             except:
                 db.session.rollback()
                 flash('There was an error editing the project data. Please try again later!', 'danger')
-   
+
 def process_performance_data(param, event):
         name = request.form['event_title']
         description = request.form['event_description']
@@ -444,11 +443,11 @@ def process_performance_data(param, event):
         date = datetime.strptime(datetime_data, '%Y-%m-%dT%H:%M')
         student_limit = request.form['student_limit']
         if 'event_pic' in request.files and request.files['event_pic'].filename != '':
-            event_pic_file = request.files['event_pic'] 
+            event_pic_file = request.files['event_pic']
             event_pic_data = event_pic_file.read()
-            image_data_b64 = base64.b64encode(event_pic_data).decode('utf-8') 
+            image_data_b64 = base64.b64encode(event_pic_data).decode('utf-8')
         else:
-            event_pic_data = ''
+            event_pic_data = None
             image_data_b64 = ''
         cost_audience = request.form['cost_audience']
         if param == 'add':
@@ -468,7 +467,7 @@ def process_performance_data(param, event):
                 flash('Performance added successfully!', 'success')
             except:
                 db.session.rollback()
-                flash('Error Adding Performance. Please Try Again!', 'warning')
+                flash('Error Adding Performance. Please Try Again!', 'danger')
         elif param == 'edit':
             event.name = name
             event.description = description
@@ -484,7 +483,7 @@ def process_performance_data(param, event):
             except:
                 db.session.rollback()
                 flash('There was an error editing the performance data. Please Try Again!', 'warning')
-        
+
 @app.route("/add/performances", methods=['GET', 'POST'])
 @login_required
 @teacher_required
@@ -520,11 +519,11 @@ def add_projects():
             db.session.commit()
             flash('Project added successfully!', 'success')
             return redirect(url_for('add_projects'))
-        
+
         elif 'cycle_submit' in request.form:
             cycle_number = request.form['cycle']
             csv_file = request.files['csv_file']
-            
+
             csv_data = csv_file.read().decode('utf-8').splitlines()
             csv_reader = csv.reader(csv_data)
             for row in csv_reader:
@@ -561,7 +560,7 @@ def edit():
         tournaments = Tournaments.query.filter_by(creator_id = current_user.id).all()
         performances = Performances.query.filter_by(creator_id = current_user.id).all()
         pweds = ProjectWednesday.query.filter_by(creator_id = current_user.id).all()
-        return render_template("edit_event.html", events=events ,tournaments = tournaments, pweds = pweds, performances = performances) 
+        return render_template("edit_event.html", events=events ,tournaments = tournaments, pweds = pweds, performances = performances)
     flash("You have no events to edit at this time!", 'warning')
     return redirect(url_for('index'))
 
@@ -580,7 +579,7 @@ def edit_performance():
         process_performance_data('edit',event)
         return redirect(url_for('edit'))
     return redirect(url_for('edit'))
-    
+
 @app.route('/edit/tournament', methods=['GET', 'POST'])
 @login_required
 @teacher_required
@@ -607,10 +606,10 @@ def edit_project_wednesday():
         return render_template('edit_pw.html',event=event)
     if request.method == 'POST':
         id = request.form.get('event_id')
-        event = ProjectWednesday.query.get(int(id))  
+        event = ProjectWednesday.query.get(int(id))
         process_project_data('edit',event)
         return redirect(url_for('edit'))
-    
+
 @app.route('/remove_event')
 @login_required
 @teacher_required
@@ -662,15 +661,15 @@ def check_admin():
     print(admins)
     for user in admins:
         if current_user.id == user.id:
-            return True 
+            return True
     return False
 
 # Import necessary modules
 @app.route('/promote', methods=['GET', 'POST'])
 @login_required
-# @admin_required
+@admin_required
 def promote():
-    # if check_admin():
+    if check_admin():
 
         role_map = {
                             'SuperAdmin': SuperAdmin,
@@ -703,7 +702,7 @@ def promote():
                     elif (current_user_obj.account_type == 'SuperAdmin' and user_to_promote.account_type == 'SuperAdmin'):
                         flash("SuperAdmins can't modify SuperAdmins.", 'danger')
                     else:
-                    
+
                         # Store current user data
                         user_data = {
                             'first_name': user_to_promote.first_name,
@@ -746,17 +745,17 @@ def promote():
                         # Delete the current user role object
 
                         db.session.delete(user_to_promote)
-                        db.session.commit()               
+                        db.session.commit()
 
                         # Map the new role to the correct class
-                    
+
                         if NewRoleClass:
                             new_user = NewRoleClass(**user_data)
                             flag_modified(new_user,'joined_events')
                             if hasattr(user_to_promote,'events_created'):
                                 flag_modified(new_user,'events_created')
                             db.session.add(new_user)
-                            db.session.commit() 
+                            db.session.commit()
                             if session_restore:
                                 login_user(new_user)
                             new_user = User.query.filter_by(email = user_data["email"]).first()
@@ -775,14 +774,14 @@ def promote():
                             events = [event for event in Event.query.all() if temp_id == event.creator_id]
                             for event in events:
                                 event.creator_id == new_user.id
-                            
+
                             new_user.account_type = new_role #update the events the user has joined
 
                             flag_modified(new_user,'joined_events')
                             if hasattr(new_user, 'events_created'):
                                 flag_modified(new_user,'events_created')
                             db.session.commit()  # Save changes
-                            
+
                             flash(f"User {user_to_promote.email} promoted to {new_role}", 'success')
                         else:
                             flash("Invalid role specified", 'danger')
@@ -792,9 +791,9 @@ def promote():
                 flash("Invalid promotion request", 'danger')
 
         return redirect(url_for('promote'))
-    # else:
-    #     flash('Invalid Clearance', 'danger')
-    #     return redirect(url_for('index'))
+    else:
+        flash('Invalid Clearance', 'danger')
+        return redirect(url_for('index'))
 
 @app.route('/admin')
 @login_required
@@ -844,7 +843,7 @@ def forbidden_error(error):
 @app.template_filter()
 def is_instance_of_filter(user,class_name):
     return is_instance_of(user,class_name)
-                 
-if __name__ == "__main__":
-    app.secret_key = "super_secret_key"  # Change this to a random, secure key
-    app.run(port = 5000, debug=True)
+
+# if __name__ == "__main__":
+#     app.secret_key = "super_secret_key"  # Change this to a random, secure key
+#     app.run(port = 5000, debug=True)
